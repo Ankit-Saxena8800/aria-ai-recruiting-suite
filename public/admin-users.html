@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Aria AI Admin</title>
+    <link rel="stylesheet" href="/components/toast.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #1A1A1A;
+            min-height: 100vh;
+            color: #FFFFFF;
+            padding: 0;
+        }
+
+        .navbar {
+            background: #252525;
+            padding: 20px 40px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+        }
+
+        .navbar-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #EFA73F;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #EFA73F;
+            color: #FFFFFF;
+        }
+
+        .btn-primary:hover {
+            background: #d89435;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #FFFFFF;
+            border: 1px solid #3a3a3a;
+        }
+
+        .btn-secondary:hover {
+            background: #258D58;
+            border-color: #258D58;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #e6e6e6;
+            font-size: 16px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #252525;
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #e6e6e6;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #EFA73F;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            color: #e6e6e6;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            color: #FFFFFF;
+        }
+
+        .tab.active {
+            color: #EFA73F;
+            border-bottom-color: #EFA73F;
+        }
+
+        .bulk-actions-bar {
+            display: none;
+            background: rgba(239, 167, 63, 0.1);
+            border: 1px solid rgba(239, 167, 63, 0.3);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bulk-actions-bar.show {
+            display: flex;
+        }
+
+        .bulk-actions-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #EFA73F;
+            font-weight: 600;
+        }
+
+        .bulk-actions-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .user-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #EFA73F;
+        }
+
+        .select-all-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #EFA73F;
+        }
+
+        .users-table {
+            background: #252525;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #1A1A1A;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #EFA73F;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid #3a3a3a;
+            color: #e6e6e6;
+        }
+
+        tbody tr:hover {
+            background: rgba(239, 167, 63, 0.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(239, 167, 63, 0.2);
+            color: #EFA73F;
+        }
+
+        .status-approved {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+        }
+
+        .status-rejected {
+            background: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-approve {
+            background: #258D58;
+            color: #FFFFFF;
+        }
+
+        .btn-approve:hover {
+            background: #1f7a4a;
+        }
+
+        .btn-reject {
+            background: #dc2626;
+            color: #FFFFFF;
+        }
+
+        .btn-reject:hover {
+            background: #b91c1c;
+        }
+
+        .btn-delete {
+            background: #7c2d12;
+            color: #FFFFFF;
+        }
+
+        .btn-delete:hover {
+            background: #5c1d0a;
+        }
+
+        .delete-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .delete-menu-btn {
+            background: #7c2d12;
+            color: #FFFFFF;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .delete-menu-btn:hover {
+            background: #5c1d0a;
+        }
+
+        .delete-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 4px;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 200px;
+        }
+
+        .delete-menu.show {
+            display: block;
+        }
+
+        .delete-menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #3a3a3a;
+            transition: background 0.2s;
+        }
+
+        .delete-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .delete-menu-item:hover {
+            background: #3a3a3a;
+        }
+
+        .delete-menu-title {
+            font-weight: 600;
+            font-size: 12px;
+            color: #EFA73F;
+            margin-bottom: 4px;
+        }
+
+        .delete-menu-desc {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .status-deleted {
+            background: rgba(124, 45, 18, 0.2);
+            color: #d97706;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666666;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .users-table {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+    <script src="/components/toast.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <img src="https://media.stage.in/static/stage_logo_horizontal.webp" alt="STAGE Logo">
+            <div class="navbar-title">Admin Panel</div>
+        </div>
+        <div class="navbar-actions">
+            <a href="/index.html" class="btn btn-secondary">Back to Tools</a>
+            <button onclick="logout()" class="btn btn-primary">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>User Management</h1>
+            <p>Review and approve user access requests</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Pending Requests</div>
+                <div class="stat-value" id="pendingCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Approved Users</div>
+                <div class="stat-value" id="approvedCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" id="totalCount">0</div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('pending')">Pending Requests</button>
+            <button class="tab" onclick="switchTab('approved')">Approved Users</button>
+            <button class="tab" onclick="switchTab('deleted')">Deleted Users</button>
+            <button class="tab" onclick="switchTab('blacklist')">Blacklist</button>
+            <button class="tab" onclick="switchTab('all')">All Users</button>
+        </div>
+
+        <!-- Bulk Actions Bar -->
+        <div class="bulk-actions-bar" id="bulkActionsBar">
+            <div class="bulk-actions-info">
+                <span id="selectedCount">0</span> users selected
+            </div>
+            <div class="bulk-actions-buttons">
+                <button class="btn btn-secondary btn-sm" onclick="bulkApprove()">Approve Selected</button>
+                <button class="btn btn-danger btn-sm" onclick="bulkReject()">Reject Selected</button>
+                <button class="btn btn-outline btn-sm" onclick="clearSelection()">Clear Selection</button>
+            </div>
+        </div>
+
+        <div class="users-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" class="select-all-checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Username</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Requested</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <p>Loading users...</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let currentTab = 'pending';
+        let allUsers = [];
+
+        // Check if user is admin
+        const userRole = localStorage.getItem('userRole');
+        if (userRole !== 'admin') {
+            alert('Access denied. Admin privileges required.');
+            window.location.href = '/login.html';
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const data = await response.json();
+
+                if (data.success) {
+                    allUsers = data.users;
+                    updateStats();
+                    displayUsers();
+                } else {
+                    console.error('Failed to load users');
+                }
+            } catch (error) {
+                console.error('Error loading users:', error);
+            }
+        }
+
+        function updateStats() {
+            const pending = allUsers.filter(u => u.status === 'pending').length;
+            const approved = allUsers.filter(u => u.status === 'approved').length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('totalCount').textContent = allUsers.length;
+        }
+
+        function displayUsers() {
+            let filteredUsers = allUsers;
+
+            if (currentTab === 'pending') {
+                filteredUsers = allUsers.filter(u => u.status === 'pending');
+            } else if (currentTab === 'approved') {
+                filteredUsers = allUsers.filter(u => u.status === 'approved');
+            } else if (currentTab === 'deleted') {
+                filteredUsers = allUsers.filter(u => u.status === 'deleted');
+            }
+
+            const tbody = document.getElementById('usersTableBody');
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <p>No users found</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredUsers.map(user => `
+                <tr>
+                    <td><input type="checkbox" class="user-checkbox" data-user-id="${user.id}" onchange="updateBulkBar()"></td>
+                    <td>${user.firstName} ${user.lastName}</td>
+                    <td>${user.email}</td>
+                    <td>${user.username}</td>
+                    <td>${user.department}</td>
+                    <td>
+                        <span class="status-badge status-${user.status}">${user.status}</span>
+                    </td>
+                    <td>${new Date(user.requestedAt).toLocaleDateString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            ${user.status === 'pending' ? `
+                                <button class="btn btn-sm btn-approve" onclick="updateUserStatus('${user.id}', 'approved')">
+                                    Approve
+                                </button>
+                                <button class="btn btn-sm btn-reject" onclick="updateUserStatus('${user.id}', 'rejected')">
+                                    Reject
+                                </button>
+                            ` : user.status === 'approved' ? `
+                                <button class="btn btn-sm btn-reject" onclick="updateUserStatus('${user.id}', 'rejected')">
+                                    Revoke
+                                </button>
+                            ` : user.status === 'deleted' ? `
+                                <button class="btn btn-sm btn-approve" onclick="updateUserStatus('${user.id}', 'approved')">
+                                    Restore
+                                </button>
+                            ` : `
+                                <button class="btn btn-sm btn-approve" onclick="updateUserStatus('${user.id}', 'approved')">
+                                    Approve
+                                </button>
+                            `}
+                            ${user.status !== 'deleted' ? `
+                                <div class="delete-dropdown">
+                                    <button class="delete-menu-btn" onclick="toggleDeleteMenu(event, '${user.id}')">
+                                        Delete ▼
+                                    </button>
+                                    <div class="delete-menu" id="menu-${user.id}">
+                                        <div class="delete-menu-item" onclick="hardDeleteUser('${user.id}', '${user.username}')">
+                                            <div class="delete-menu-title">Hard Delete</div>
+                                            <div class="delete-menu-desc">Remove completely (can re-register)</div>
+                                        </div>
+                                        <div class="delete-menu-item" onclick="softDeleteUser('${user.id}', '${user.username}')">
+                                            <div class="delete-menu-title">Soft Delete</div>
+                                            <div class="delete-menu-desc">Keep history (block re-registration)</div>
+                                        </div>
+                                        <div class="delete-menu-item" onclick="blacklistUser('${user.id}', '${user.username}')">
+                                            <div class="delete-menu-title">Blacklist</div>
+                                            <div class="delete-menu-desc">Permanently block forever</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : `
+                                <button class="btn btn-sm btn-delete" onclick="hardDeleteUser('${user.id}', '${user.username}')">
+                                    Remove
+                                </button>
+                            `}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update active tab
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Clear selection when switching tabs
+            clearSelection();
+
+            if (tab === 'blacklist') {
+                displayBlacklist();
+            } else {
+                displayUsers();
+            }
+        }
+
+        function toggleDeleteMenu(event, userId) {
+            event.stopPropagation();
+            const menu = document.getElementById('menu-' + userId);
+
+            // Close all other menus
+            document.querySelectorAll('.delete-menu').forEach(m => {
+                if (m.id !== 'menu-' + userId) {
+                    m.classList.remove('show');
+                }
+            });
+
+            menu.classList.toggle('show');
+        }
+
+        // Close menus when clicking outside
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.delete-menu').forEach(m => {
+                m.classList.remove('show');
+            });
+        });
+
+        async function updateUserStatus(userId, status) {
+            try {
+                const response = await fetch('/api/admin/update-status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId, status }),
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    toastSuccess('Status Updated', `User status changed to ${status}`);
+                    await loadUsers();
+                } else {
+                    toastError('Update Failed', 'Failed to update user status');
+                }
+            } catch (error) {
+                console.error('Error updating status:', error);
+                toastError('Error', 'Error updating user status');
+            }
+        }
+
+        async function hardDeleteUser(userId, username) {
+            const confirmed = confirm(`HARD DELETE: "${username}"\n\n✓ Remove completely\n✓ Can re-register\n\nContinue?`);
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/admin/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    toastSuccess('User Deleted', 'User has been permanently removed and can re-register');
+                    await loadUsers();
+                } else {
+                    toastError('Delete Failed', data.message || 'Failed to delete user');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastError('Error', 'Error deleting user');
+            }
+        }
+
+        async function softDeleteUser(userId, username) {
+            const confirmed = confirm(`SOFT DELETE: "${username}"\n\n✓ Keep history\n✓ Block re-registration\n✓ Can restore later\n\nContinue?`);
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/admin/soft-delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    toastSuccess('User Soft Deleted', 'User marked as deleted, history preserved, cannot re-register');
+                    await loadUsers();
+                } else {
+                    toastError('Soft Delete Failed', data.message || 'Failed to soft delete user');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastError('Error', 'Error soft deleting user');
+            }
+        }
+
+        async function blacklistUser(userId, username) {
+            const confirmed = confirm(`BLACKLIST: "${username}"\n\n✗ Permanently blocked\n✗ Cannot ever re-register\n✗ Removes from users\n\nThis is the most severe action. Continue?`);
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/admin/blacklist-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    toastWarning('User Blacklisted', 'User permanently blocked and cannot ever re-register');
+                    await loadUsers();
+                } else {
+                    toastError('Blacklist Failed', data.message || 'Failed to blacklist user');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                toastError('Error', 'Error blacklisting user');
+            }
+        }
+
+        async function displayBlacklist() {
+            try {
+                const response = await fetch('/api/admin/blacklist');
+                const data = await response.json();
+
+                const tbody = document.getElementById('usersTableBody');
+
+                if (!data.success || data.blacklist.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <p>No blacklisted users</p>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                tbody.innerHTML = data.blacklist.map(entry => `
+                    <tr>
+                        <td>${entry.firstName} ${entry.lastName}</td>
+                        <td>${entry.email}</td>
+                        <td>${entry.username}</td>
+                        <td>-</td>
+                        <td><span class="status-badge status-rejected">Blacklisted</span></td>
+                        <td>${new Date(entry.blacklistedAt).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn-sm btn-approve" onclick="unblacklistUser('${entry.id}', '${entry.username}')">
+                                Remove from Blacklist
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading blacklist:', error);
+            }
+        }
+
+        async function unblacklistUser(blacklistId, username) {
+            const confirmed = confirm(`Remove "${username}" from blacklist?\n\nThey will be able to register again.`);
+            if (!confirmed) return;
+
+            try {
+                const response = await fetch('/api/admin/unblacklist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ blacklistId }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    displayBlacklist();
+                } else {
+                    alert(data.message || 'Failed to remove from blacklist');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error removing from blacklist');
+            }
+        }
+
+        // Bulk Operations Functions
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.user-checkbox');
+
+            checkboxes.forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+
+            updateBulkBar();
+        }
+
+        function updateBulkBar() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            const bulkBar = document.getElementById('bulkActionsBar');
+            const selectedCount = document.getElementById('selectedCount');
+            const selectAll = document.getElementById('selectAll');
+
+            selectedCount.textContent = checkboxes.length;
+
+            if (checkboxes.length > 0) {
+                bulkBar.classList.add('show');
+            } else {
+                bulkBar.classList.remove('show');
+            }
+
+            // Update select all checkbox state
+            const allCheckboxes = document.querySelectorAll('.user-checkbox');
+            selectAll.checked = allCheckboxes.length > 0 && checkboxes.length === allCheckboxes.length;
+        }
+
+        function clearSelection() {
+            document.querySelectorAll('.user-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('selectAll').checked = false;
+            updateBulkBar();
+        }
+
+        function getSelectedUserIds() {
+            const checkboxes = document.querySelectorAll('.user-checkbox:checked');
+            return Array.from(checkboxes).map(cb => cb.getAttribute('data-user-id'));
+        }
+
+        async function bulkApprove() {
+            const selectedIds = getSelectedUserIds();
+
+            if (selectedIds.length === 0) {
+                toastWarning('No Selection', 'Please select users to approve');
+                return;
+            }
+
+            const confirmed = confirm(`Are you sure you want to approve ${selectedIds.length} user(s)?`);
+            if (!confirmed) return;
+
+            toastInfo('Processing', `Approving ${selectedIds.length} users...`);
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const userId of selectedIds) {
+                try {
+                    const response = await fetch('/api/admin/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, status: 'approved' })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.error('Error approving user:', userId, error);
+                    errorCount++;
+                }
+            }
+
+            clearSelection();
+            await loadUsers();
+
+            if (errorCount === 0) {
+                toastSuccess('Bulk Approve Complete', `Successfully approved ${successCount} user(s)`);
+            } else {
+                toastWarning('Bulk Approve Complete', `Approved ${successCount}, Failed ${errorCount}`);
+            }
+        }
+
+        async function bulkReject() {
+            const selectedIds = getSelectedUserIds();
+
+            if (selectedIds.length === 0) {
+                toastWarning('No Selection', 'Please select users to reject');
+                return;
+            }
+
+            const confirmed = confirm(`Are you sure you want to reject ${selectedIds.length} user(s)? This action will deny their access.`);
+            if (!confirmed) return;
+
+            toastInfo('Processing', `Rejecting ${selectedIds.length} users...`);
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const userId of selectedIds) {
+                try {
+                    const response = await fetch('/api/admin/update-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, status: 'rejected' })
+                    });
+
+                    const data = await response.json();
+                    if (data.success) {
+                        successCount++;
+                    } else {
+                        errorCount++;
+                    }
+                } catch (error) {
+                    console.error('Error rejecting user:', userId, error);
+                    errorCount++;
+                }
+            }
+
+            clearSelection();
+            await loadUsers();
+
+            if (errorCount === 0) {
+                toastSuccess('Bulk Reject Complete', `Successfully rejected ${successCount} user(s)`);
+            } else {
+                toastWarning('Bulk Reject Complete', `Rejected ${successCount}, Failed ${errorCount}`);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');
+            // Clear session and redirect to login
+            window.location.href = '/login.html';
+        }
+
+        // Load users on page load
+        loadUsers();
+
+        // Refresh every 30 seconds
+        setInterval(loadUsers, 30000);
+    </script>
+</body>
+</html>

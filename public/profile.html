@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Aria AI</title>
+    <link rel="stylesheet" href="/styles/global.css">
+    <link rel="stylesheet" href="/styles/components.css">
+    <link rel="stylesheet" href="/components/toast.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #1A1A1A 0%, #2a2a2a 100%);
+            min-height: 100vh;
+            padding-bottom: var(--space-3xl);
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(239, 167, 63, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(37, 141, 88, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .profile-container {
+            max-width: 1000px;
+            margin: var(--space-3xl) auto;
+            padding: 0 var(--space-xl);
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: var(--space-xl);
+            margin-bottom: var(--space-2xl);
+            padding: var(--space-2xl);
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+            border: 4px solid var(--border-default);
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+            margin-bottom: var(--space-sm);
+            color: var(--color-white);
+        }
+
+        .profile-email {
+            color: var(--color-gray-light);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: var(--space-lg);
+            flex-wrap: wrap;
+        }
+
+        .profile-meta-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            color: var(--color-gray-lighter);
+            font-size: var(--font-size-sm);
+        }
+
+        .tabs-container {
+            margin-bottom: var(--space-xl);
+        }
+
+        .tab-panels {
+            background: var(--bg-card);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-xl);
+            padding: var(--space-2xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-title {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--color-primary);
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-md);
+            border-bottom: 2px solid var(--border-default);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .info-item {
+            padding: var(--space-lg);
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-default);
+        }
+
+        .info-label {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-light);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: var(--font-size-base);
+            color: var(--color-white);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            padding: var(--space-md);
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-md);
+            border-left: 3px solid var(--color-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: var(--font-weight-semibold);
+            color: var(--color-white);
+            margin-bottom: var(--space-xs);
+        }
+
+        .activity-meta {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-light);
+        }
+
+        .password-strength {
+            margin-top: var(--space-md);
+        }
+
+        .strength-bar {
+            height: 6px;
+            background: var(--bg-input);
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-bottom: var(--space-sm);
+        }
+
+        .strength-fill {
+            height: 100%;
+            transition: all var(--transition-base);
+            border-radius: var(--radius-full);
+        }
+
+        .strength-fill.weak {
+            width: 33%;
+            background: var(--color-error);
+        }
+
+        .strength-fill.medium {
+            width: 66%;
+            background: var(--color-warning);
+        }
+
+        .strength-fill.strong {
+            width: 100%;
+            background: var(--color-success);
+        }
+
+        .strength-text {
+            font-size: var(--font-size-sm);
+            color: var(--color-gray-light);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--space-md);
+            margin-top: var(--space-xl);
+            padding-top: var(--space-xl);
+            border-top: 1px solid var(--border-default);
+        }
+
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-meta {
+                justify-content: center;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <script src="/components/toast.js"></script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <a href="/" class="navbar-brand">
+                <img src="https://media.stage.in/static/stage_logo_horizontal.webp" alt="STAGE Logo" class="navbar-logo">
+                <span class="navbar-title">Aria AI</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="/index.html" class="navbar-link">Tools</a></li>
+                <li><a href="/admin-users.html" class="navbar-link" id="adminLink" style="display: none;">Admin</a></li>
+                <li><a href="/profile.html" class="navbar-link active">Profile</a></li>
+                <li><button class="btn btn-sm btn-primary" onclick="logout()">Logout</button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar" id="avatarInitials">AS</div>
+            <div class="profile-info">
+                <h1 class="profile-name" id="profileName">Loading...</h1>
+                <div class="profile-email">
+                    <span>📧</span>
+                    <span id="profileEmail">loading@example.com</span>
+                </div>
+                <div class="profile-meta">
+                    <div class="profile-meta-item">
+                        <span>👤</span>
+                        <span id="profileUsername">username</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <span>🏢</span>
+                        <span id="profileDepartment">Department</span>
+                    </div>
+                    <div class="profile-meta-item">
+                        <span class="badge badge-success" id="profileStatus">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs-container">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('details')">Account Details</button>
+                <button class="tab" onclick="switchTab('edit')">Edit Profile</button>
+                <button class="tab" onclick="switchTab('password')">Change Password</button>
+                <button class="tab" onclick="switchTab('activity')">Activity</button>
+            </div>
+        </div>
+
+        <!-- Tab Panels -->
+        <div class="tab-panels">
+            <!-- Account Details Tab -->
+            <div class="tab-content active" id="detailsTab">
+                <h2 class="section-title">Account Information</h2>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Full Name</div>
+                        <div class="info-value" id="detailName">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email Address</div>
+                        <div class="info-value" id="detailEmail">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Username</div>
+                        <div class="info-value" id="detailUsername">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Department</div>
+                        <div class="info-value" id="detailDepartment">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Account Status</div>
+                        <div class="info-value">
+                            <span class="badge badge-success" id="detailStatus">Active</span>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value" id="detailJoined">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Login Method</div>
+                        <div class="info-value" id="detailLoginMethod">Password</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Role</div>
+                        <div class="info-value" id="detailRole">User</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Edit Profile Tab -->
+            <div class="tab-content" id="editTab">
+                <h2 class="section-title">Edit Profile</h2>
+
+                <form id="editProfileForm">
+                    <div class="form-group">
+                        <label class="form-label required" for="editFirstName">First Name</label>
+                        <input type="text" id="editFirstName" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="editLastName">Last Name</label>
+                        <input type="text" id="editLastName" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editDepartment">Department</label>
+                        <input type="text" id="editDepartment" class="form-input" placeholder="e.g., Engineering, HR, Operations">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="editEmail">Email Address</label>
+                        <input type="email" id="editEmail" class="form-input" disabled>
+                        <div class="form-hint">Email cannot be changed. Contact admin if needed.</div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="cancelEdit()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Change Password Tab -->
+            <div class="tab-content" id="passwordTab">
+                <h2 class="section-title">Change Password</h2>
+
+                <div class="alert alert-info" id="ssoAlert" style="display: none;">
+                    <span>ℹ</span>
+                    <div>You're using Google SSO. Password change is not available for SSO accounts.</div>
+                </div>
+
+                <form id="changePasswordForm">
+                    <div class="form-group">
+                        <label class="form-label required" for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" class="form-input" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" class="form-input" required minlength="8">
+                        <div class="form-hint">Password must be at least 8 characters long</div>
+
+                        <div class="password-strength">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strengthBar"></div>
+                            </div>
+                            <div class="strength-text" id="strengthText"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="form-input" required>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" onclick="cancelPasswordChange()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Password</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Activity Tab -->
+            <div class="tab-content" id="activityTab">
+                <h2 class="section-title">Recent Activity</h2>
+
+                <ul class="activity-list" id="activityList">
+                    <li class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <h3 class="empty-state-title">No activity yet</h3>
+                        <p class="empty-state-description">Your account activity will appear here</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Check authentication
+        function checkAuth() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                window.location.href = '/login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Load user profile
+        async function loadProfile() {
+            try {
+                const response = await fetch('/api/profile', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    displayProfile(data.user);
+                } else {
+                    toastError('Error', 'Failed to load profile');
+                    if (data.message === 'Unauthorized') {
+                        setTimeout(() => window.location.href = '/login.html', 1500);
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                toastError('Error', 'Failed to load profile');
+            }
+        }
+
+        // Display profile data
+        function displayProfile(user) {
+            const initials = (user.firstName[0] + user.lastName[0]).toUpperCase();
+            document.getElementById('avatarInitials').textContent = initials;
+            document.getElementById('profileName').textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById('profileEmail').textContent = user.email;
+            document.getElementById('profileUsername').textContent = user.username;
+            document.getElementById('profileDepartment').textContent = user.department || 'Not specified';
+            document.getElementById('profileStatus').textContent = user.status;
+
+            // Details tab
+            document.getElementById('detailName').textContent = `${user.firstName} ${user.lastName}`;
+            document.getElementById('detailEmail').textContent = user.email;
+            document.getElementById('detailUsername').textContent = user.username;
+            document.getElementById('detailDepartment').textContent = user.department || 'Not specified';
+            document.getElementById('detailStatus').textContent = user.status;
+            document.getElementById('detailJoined').textContent = new Date(user.requestedAt).toLocaleDateString();
+            document.getElementById('detailLoginMethod').textContent = user.ssoProvider ? `Google SSO` : 'Username/Password';
+            document.getElementById('detailRole').textContent = user.role;
+
+            // Edit tab
+            document.getElementById('editFirstName').value = user.firstName;
+            document.getElementById('editLastName').value = user.lastName;
+            document.getElementById('editDepartment').value = user.department || '';
+            document.getElementById('editEmail').value = user.email;
+
+            // Password tab - disable if SSO
+            if (user.ssoProvider) {
+                document.getElementById('ssoAlert').style.display = 'flex';
+                document.getElementById('changePasswordForm').style.display = 'none';
+            }
+
+            // Show admin link if admin
+            if (user.role === 'admin') {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+
+            // Load activity logs when activity tab is opened
+            if (tabName === 'activity') {
+                loadActivityLogs();
+            }
+        }
+
+        // Load activity logs
+        async function loadActivityLogs() {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = '<li style="text-align: center; padding: 20px;">Loading activity...</li>';
+
+            try {
+                const response = await fetch('/api/audit-logs/me', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.logs.length > 0) {
+                    activityList.innerHTML = data.logs.map(log => {
+                        const date = new Date(log.timestamp);
+                        const icon = getActivityIcon(log.action);
+                        const description = getActivityDescription(log.action, log.details);
+
+                        return `
+                            <li class="activity-item">
+                                <div class="activity-content">
+                                    <div class="activity-title">${icon} ${description}</div>
+                                    <div class="activity-meta">
+                                        ${date.toLocaleString()} • IP: ${log.ipAddress}
+                                    </div>
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    activityList.innerHTML = `
+                        <li class="empty-state">
+                            <div class="empty-state-icon">📋</div>
+                            <h3 class="empty-state-title">No activity yet</h3>
+                            <p class="empty-state-description">Your account activity will appear here</p>
+                        </li>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading activity:', error);
+                activityList.innerHTML = `
+                    <li class="alert alert-error">
+                        <span>✕</span>
+                        <div>Failed to load activity logs</div>
+                    </li>
+                `;
+            }
+        }
+
+        // Get icon for activity type
+        function getActivityIcon(action) {
+            const icons = {
+                'USER_LOGIN': '🔓',
+                'USER_REGISTERED': '✨',
+                'PROFILE_UPDATED': '✏️',
+                'PASSWORD_CHANGED': '🔐',
+                'PASSWORD_CHANGE_FAILED': '❌',
+                'LOGIN_FAILED': '⚠️',
+                'LOGIN_DENIED': '🚫',
+                'USER_STATUS_CHANGED': '🔄'
+            };
+            return icons[action] || '📌';
+        }
+
+        // Get human-readable description
+        function getActivityDescription(action, details) {
+            const descriptions = {
+                'USER_LOGIN': 'Logged in successfully',
+                'USER_REGISTERED': 'Account registered',
+                'PROFILE_UPDATED': 'Profile information updated',
+                'PASSWORD_CHANGED': 'Password changed successfully',
+                'PASSWORD_CHANGE_FAILED': 'Failed password change attempt',
+                'LOGIN_FAILED': 'Failed login attempt',
+                'LOGIN_DENIED': `Login denied: ${details.reason || 'Unknown'}`,
+                'USER_STATUS_CHANGED': `Account status changed to ${details.newStatus || 'unknown'}`
+            };
+            return descriptions[action] || action.replace(/_/g, ' ');
+        }
+
+        // Edit profile form
+        document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const firstName = document.getElementById('editFirstName').value;
+            const lastName = document.getElementById('editLastName').value;
+            const department = document.getElementById('editDepartment').value;
+
+            try {
+                const response = await fetch('/api/profile/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    },
+                    body: JSON.stringify({ firstName, lastName, department })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    toastSuccess('Profile Updated', 'Your profile has been updated successfully');
+                    await loadProfile();
+                    switchTab('details');
+                } else {
+                    toastError('Update Failed', data.message || 'Failed to update profile');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                toastError('Error', 'Failed to update profile');
+            }
+        });
+
+        function cancelEdit() {
+            loadProfile(); // Reset form
+            switchTab('details');
+        }
+
+        // Password strength checker
+        document.getElementById('newPassword')?.addEventListener('input', (e) => {
+            const password = e.target.value;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+
+            if (!password) {
+                strengthBar.className = 'strength-fill';
+                strengthText.textContent = '';
+                return;
+            }
+
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+            if (strength <= 2) {
+                strengthBar.className = 'strength-fill weak';
+                strengthText.textContent = 'Weak password';
+                strengthText.style.color = 'var(--color-error)';
+            } else if (strength <= 4) {
+                strengthBar.className = 'strength-fill medium';
+                strengthText.textContent = 'Medium strength';
+                strengthText.style.color = 'var(--color-warning)';
+            } else {
+                strengthBar.className = 'strength-fill strong';
+                strengthText.textContent = 'Strong password';
+                strengthText.style.color = 'var(--color-success)';
+            }
+        });
+
+        // Change password form
+        document.getElementById('changePasswordForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (newPassword !== confirmPassword) {
+                toastError('Validation Error', 'New passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                toastError('Validation Error', 'Password must be at least 8 characters');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/profile/change-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('authToken')
+                    },
+                    body: JSON.stringify({ currentPassword, newPassword })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    toastSuccess('Password Changed', 'Your password has been updated successfully');
+                    document.getElementById('changePasswordForm').reset();
+                    document.getElementById('strengthBar').className = 'strength-fill';
+                    document.getElementById('strengthText').textContent = '';
+                } else {
+                    toastError('Change Failed', data.message || 'Failed to change password');
+                }
+            } catch (error) {
+                console.error('Error changing password:', error);
+                toastError('Error', 'Failed to change password');
+            }
+        });
+
+        function cancelPasswordChange() {
+            document.getElementById('changePasswordForm').reset();
+            document.getElementById('strengthBar').className = 'strength-fill';
+            document.getElementById('strengthText').textContent = '';
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('userRole');
+            toastSuccess('Logged Out', 'You have been logged out successfully');
+            setTimeout(() => window.location.href = '/login.html', 1000);
+        }
+
+        // Initialize
+        if (checkAuth()) {
+            loadProfile();
+        }
+    </script>
+</body>
+</html>

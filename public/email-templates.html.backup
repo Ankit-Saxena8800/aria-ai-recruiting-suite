@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Templates - Aria AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #2d3561 100%);
+            min-height: 100vh;
+            color: #e6e9f0;
+            padding: 32px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(239, 167, 63, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: float 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -30%;
+            left: -20%;
+            width: 70%;
+            height: 70%;
+            background: radial-gradient(circle, rgba(37, 141, 88, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatReverse 25s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(-30px, 30px) scale(1.1); }
+        }
+
+        @keyframes floatReverse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.05); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 12px;
+            background: linear-gradient(
+                135deg,
+                #EFA73F 0%,
+                #f4c15d 25%,
+                #EFA73F 50%,
+                #258D58 75%,
+                #2ea76a 100%
+            );
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            font-weight: 800;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+
+        .header p {
+            color: #b8c1ec;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%);
+            color: #e6e9f0;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95em;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.2);
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .back-btn:hover {
+            transform: translateX(-5px) translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.4);
+        }
+
+        .card {
+            background: linear-gradient(135deg, rgba(45, 53, 97, 0.4) 0%, rgba(26, 31, 58, 0.6) 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(239, 167, 63, 0.15);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 32px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            animation: fadeInUp 0.6s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(239, 167, 63, 0.3);
+            box-shadow:
+                0 12px 48px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.1em;
+            letter-spacing: 0.3px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 18px 20px;
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.04);
+            color: #e6e9f0;
+            font-size: 1em;
+            font-family: inherit;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #EFA73F;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow:
+                0 0 0 4px rgba(239, 167, 63, 0.15),
+                0 0 20px rgba(239, 167, 63, 0.2),
+                0 8px 24px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        option {
+            background: #1a1a2e;
+            color: #e6e9f0;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%);
+            color: #e6e9f0;
+            padding: 18px 48px;
+            border: none;
+            border-radius: 32px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 40px rgba(239, 167, 63, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 48px;
+            color: #EFA73F;
+            font-size: 1.2em;
+        }
+
+        .loading.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .result {
+            display: none;
+            margin-top: 40px;
+        }
+
+        .result.active {
+            display: block;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid rgba(239, 167, 63, 0.2);
+        }
+
+        .result-header h3 {
+            color: #EFA73F;
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .formatted-result {
+            display: grid;
+            gap: 24px;
+        }
+
+        .result-section {
+            background: linear-gradient(
+                135deg,
+                rgba(45, 53, 97, 0.3) 0%,
+                rgba(26, 31, 58, 0.5) 100%
+            );
+            border: 1px solid rgba(239, 167, 63, 0.2);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #EFA73F 0%, #258D58 100%);
+        }
+
+        .result-section::after {
+            content: \'\';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle at top right,
+                rgba(239, 167, 63, 0.05) 0%,
+                transparent 50%
+            );
+            pointer-events: none;
+        }
+
+        .result-section:hover {
+            background: linear-gradient(
+                135deg,
+                rgba(45, 53, 97, 0.4) 0%,
+                rgba(26, 31, 58, 0.6) 100%
+            );
+            border-color: rgba(239, 167, 63, 0.3);
+            transform: translateX(4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            color: #f4c15d;
+            font-size: 1.3em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-icon {
+            font-size: 1.4em;
+        }
+
+        .copy-btn {
+            background: rgba(239, 167, 63, 0.15);
+            border: 1px solid rgba(239, 167, 63, 0.3);
+            color: #EFA73F;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(239, 167, 63, 0.25);
+            border-color: #EFA73F;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 167, 63, 0.3);
+        }
+
+        .copy-btn.copied {
+            background: rgba(37, 141, 88, 0.25);
+            border-color: #258D58;
+            color: #4ade80;
+        }
+
+        .section-content {
+            color: #e6e6e6;
+            line-height: 1.8;
+            font-size: 1.05em;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #EFA73F;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: linear-gradient(135deg, #258D58 0%, #2dd46d 100%);
+            color: #e6e9f0;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(37, 141, 88, 0.4);
+            font-weight: 600;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(100px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Home</a>
+
+        <div class="header">
+            <h1>Email Templates Generator</h1>
+            <p style="color: #a8b2d1;">Create professional candidate emails instantly</p>
+        </div>
+
+        <div class="card">
+            <form id="emailForm">
+                <label for="emailType">Email Type:</label>
+                <select id="emailType" required>
+                    <option value="outreach">Initial Outreach / Sourcing</option>
+                    <option value="followup">Follow-up Email</option>
+                    <option value="interview-invite">Interview Invitation</option>
+                    <option value="rejection">Rejection Email</option>
+                    <option value="offer">Offer Email</option>
+                    <option value="onboarding">Onboarding Welcome</option>
+                </select>
+
+                <label for="candidateName">Candidate Name:</label>
+                <input type="text" id="candidateName" placeholder="e.g., Rahul Sharma" required>
+
+                <label for="jobTitle">Position:</label>
+                <input type="text" id="jobTitle" placeholder="e.g., Senior Backend Engineer" required>
+
+                <label for="context">Additional Context (optional):</label>
+                <textarea id="context" placeholder="e.g., Saw their work on GitHub, impressed by their Python skills"></textarea>
+
+                <button type="submit" class="btn" id="submitBtn">Generate Email</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                AI is creating your email...
+            </div>
+
+            <div class="result" id="result">
+                <div class="result-header">
+                    <h3>Your Email Template</h3>
+                </div>
+                <div id="resultText" class="formatted-result"></div>
+            </div>
+
+            <div class="toast" id="copyToast">Copied to clipboard!</div>
+        </div>
+    </div>
+
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('copyToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        async function copyToClipboard(text, button) {
+            try {
+                await navigator.clipboard.writeText(text);
+                const originalText = button.innerHTML;
+                button.innerHTML = '<span style="font-size: 1em;">✓</span> Copied!';
+                button.classList.add('copied');
+                showToast('Copied to clipboard!');
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+                showToast('Failed to copy');
+            }
+        }
+
+        function formatResult(text) {
+            const resultText = document.getElementById('resultText');
+            resultText.innerHTML = '';
+
+            // Only split on major section headers (### headings), not on every line
+            const sections = text.split(/\n(?=###\s)/);
+
+            sections.forEach((section, index) => {
+                if (!section.trim()) return;
+
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'result-section';
+
+                let icon = '✉️';
+                let title = 'Email Template';
+                let content = section;
+
+                // Extract title from ### heading
+                if (section.match(/^###\s+(.+)/m)) {
+                    const match = section.match(/^###\s+(.+)/m);
+                    title = match[1];
+                    content = section.replace(/^###\s+.+\n/m, '');
+                }
+
+                if (title.toLowerCase().includes('subject')) icon = '📧';
+                else if (title.toLowerCase().includes('body')) icon = '💬';
+                else if (title.toLowerCase().includes('greet')) icon = '👋';
+                else if (title.toLowerCase().includes('signature')) icon = '✍️';
+                else if (title.toLowerCase().includes('template')) icon = '📄';
+
+                const sectionHeader = document.createElement('div');
+                sectionHeader.className = 'section-header';
+
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.innerHTML = `<span class="section-icon">${icon}</span>${title}`;
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = '<span style="font-size: 1.1em;">📋</span> Copy';
+                copyBtn.onclick = () => copyToClipboard(content.trim(), copyBtn);
+
+                sectionHeader.appendChild(sectionTitle);
+                sectionHeader.appendChild(copyBtn);
+
+                const sectionContent = document.createElement('div');
+                sectionContent.className = 'section-content';
+                sectionContent.innerHTML = formatText(content);
+
+                sectionDiv.appendChild(sectionHeader);
+                sectionDiv.appendChild(sectionContent);
+                resultText.appendChild(sectionDiv);
+            });
+        }
+
+        function formatText(text) {
+            return text
+                .replace(/\*\*([^*]+)\*\*/g, '<strong style="color: #f4c15d;">$1</strong>')
+                .replace(/\*([^*]+)\*/g, '<em style="color: #b8c1ec;">$1</em>')
+                .replace(/`([^`]+)`/g, '<code style="background: rgba(239, 167, 63, 0.15); padding: 2px 8px; border-radius: 4px; color: #EFA73F; font-family: monospace;">$1</code>')
+                .replace(/^- (.+)$/gm, '<div style="margin-left: 20px; margin-bottom: 8px;">• $1</div>')
+                .replace(/^\d+\. (.+)$/gm, '<div style="margin-left: 20px; margin-bottom: 8px;">$1</div>')
+                .replace(/\n\n/g, '<div style="height: 12px;"></div>')
+                .replace(/\n/g, '<br>');
+        }
+
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                emailType: document.getElementById('emailType').value,
+                candidateName: document.getElementById('candidateName').value,
+                jobTitle: document.getElementById('jobTitle').value,
+                context: document.getElementById('context').value
+            };
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/generate-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    formatResult(result.email);
+                    document.getElementById('result').classList.add('active');
+                } else {
+                    document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + result.error + '</div></div>';
+                    document.getElementById('result').classList.add('active');
+                }
+            } catch (error) {
+                document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
+                document.getElementById('result').classList.add('active');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

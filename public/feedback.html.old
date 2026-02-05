@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Feedback - Aria AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1A1A1A; min-height: 100vh; color: white; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%); -webkit-background-clip: text; font-weight: 800; -webkit-text-fill-color: transparent; }
+        .back-btn {
+            background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(239, 167, 63, 0.4);
+        }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; margin-bottom: 30px; }
+        label { display: block; margin-bottom: 10px; color: #EFA73F; font-weight: 600; font-size: 1.1em; }
+        input, select { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: white; font-size: 1em; font-family: inherit; margin-bottom: 20px; }
+        input:focus, select:focus { outline: none; border-color: #EFA73F; }
+        option { background: #1A1A1A; color: white; }
+        .btn { background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%); color: white; padding: 15px 40px; border: none; border-radius: 25px; font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 20px; transition: all 0.3s; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(239, 167, 63, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .loading { display: none; text-align: center; padding: 40px; color: #EFA73F; font-size: 1.2em; }
+        .loading.active { display: block; }
+        .result { display: none; background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; margin-top: 30px; border: 1px solid rgba(239, 167, 63, 0.3); }
+        .result.active { display: block; }
+        .result h3 { color: #EFA73F; margin-bottom: 20px; font-size: 1.5em; }
+        .result pre { white-space: pre-wrap; word-wrap: break-word; line-height: 2; color: #e6e6e6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1.05em; background: rgba(0, 0, 0, 0.3); padding: 25px; border-radius: 10px; border-left: 4px solid #EFA73F; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid #EFA73F; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Home</a>
+        <div class="header">
+            <h1>Interview Feedback Form Generator</h1>
+            <p style="color: #a8b2d1;">Create structured interview feedback forms</p>
+        </div>
+        <div class="card">
+            <form id="feedbackForm">
+                <label for="position">Position:</label>
+                <input type="text" id="position" placeholder="e.g., Senior Backend Engineer" required>
+
+                <label for="interviewType">Interview Type:</label>
+                <select id="interviewType" required>
+                    <option value="technical">Technical Interview</option>
+                    <option value="behavioral">Behavioral Interview</option>
+                    <option value="cultural">Cultural Fit Interview</option>
+                    <option value="final">Final Round / Panel</option>
+                    <option value="phone">Phone Screening</option>
+                </select>
+
+                <button type="submit" class="btn" id="submitBtn">Generate Feedback Form</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                AI is generating interview feedback form...
+            </div>
+
+            <div class="result" id="result">
+                <h3>Interview Feedback Form:</h3>
+                <pre id="resultText"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                position: document.getElementById('position').value,
+                type: document.getElementById('interviewType').value
+            };
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/feedback-form', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                document.getElementById('resultText').textContent = result.success ? result.form : 'Error: ' + result.error;
+                document.getElementById('result').classList.add('active');
+            } catch (error) {
+                document.getElementById('resultText').textContent = 'Error: ' + error.message;
+                document.getElementById('result').classList.add('active');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

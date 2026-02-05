@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JD Generator - Aria AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1A1A1A; min-height: 100vh; color: white; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%); -webkit-background-clip: text; font-weight: 800; -webkit-text-fill-color: transparent; }
+        .back-btn {
+            background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(239, 167, 63, 0.4);
+        }
+        .card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 40px; margin-bottom: 30px; }
+        label { display: block; margin-bottom: 10px; color: #EFA73F; font-weight: 600; font-size: 1.1em; }
+        input, textarea, select { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.05); color: white; font-size: 1em; font-family: inherit; margin-bottom: 20px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #EFA73F; }
+        textarea { min-height: 100px; resize: vertical; }
+        .btn { background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%); color: white; padding: 15px 40px; border: none; border-radius: 25px; font-size: 1.1em; font-weight: 600; cursor: pointer; margin-top: 20px; transition: all 0.3s; }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(239, 167, 63, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .loading { display: none; text-align: center; padding: 40px; color: #EFA73F; font-size: 1.2em; }
+        .loading.active { display: block; }
+        .result { display: none; background: rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 15px; margin-top: 30px; border: 1px solid rgba(239, 167, 63, 0.3); }
+        .result.active { display: block; }
+        .result h3 { color: #EFA73F; margin-bottom: 20px; font-size: 1.5em; }
+        .result pre { white-space: pre-wrap; word-wrap: break-word; line-height: 2; color: #e6e6e6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 1.05em; background: rgba(0, 0, 0, 0.3); padding: 25px; border-radius: 10px; border-left: 4px solid #EFA73F; }
+        .spinner { border: 4px solid rgba(255, 255, 255, 0.1); border-top: 4px solid #EFA73F; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .tabs { display: flex; gap: 10px; margin-bottom: 30px; }
+        .tab { flex: 1; padding: 15px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 10px; color: #a8b2d1; cursor: pointer; text-align: center; font-weight: 600; transition: all 0.3s; }
+        .tab.active { background: linear-gradient(135deg, #EFA73F 0%, #258D58 100%); color: white; border-color: #EFA73F; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .file-upload-area { background: rgba(255, 255, 255, 0.05); border: 2px dashed rgba(239, 167, 63, 0.5); border-radius: 10px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 20px; }
+        .file-upload-area:hover { border-color: #EFA73F; background: rgba(239, 167, 63, 0.1); }
+        .file-upload-area input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Home</a>
+        <div class="header">
+            <h1>Job Description Generator</h1>
+            <p style="color: #a8b2d1;">Create professional JDs in seconds</p>
+        </div>
+        <div class="card">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('text')">Paste Text</div>
+                <div class="tab" onclick="switchTab('file')">Upload File</div>
+            </div>
+
+            <!-- Text Input Tab -->
+            <div id="textTab" class="tab-content active">
+                <form id="jdForm">
+                    <label for="jobTitle">Job Title:</label>
+                    <input type="text" id="jobTitle" placeholder="e.g., Senior Backend Engineer" required>
+
+                    <label for="experience">Experience Required:</label>
+                    <input type="text" id="experience" placeholder="e.g., 4-6 years" required>
+
+                    <label for="skills">Key Skills (comma-separated):</label>
+                    <textarea id="skills" placeholder="e.g., Python, Django, AWS, PostgreSQL, Microservices" required></textarea>
+
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" placeholder="e.g., Noida / Remote" required>
+
+                    <label for="additional">Additional Requirements (optional):</label>
+                    <textarea id="additional" placeholder="e.g., OTT/Video streaming experience preferred, startup mindset"></textarea>
+
+                    <button type="submit" class="btn" id="submitBtn">Generate Job Description</button>
+                </form>
+            </div>
+
+            <!-- File Upload Tab -->
+            <div id="fileTab" class="tab-content">
+                <form id="fileUploadForm" enctype="multipart/form-data">
+                    <label>Upload Existing JD to Improve:</label>
+                    <div class="file-upload-area" onclick="document.getElementById('existingJD').click()">
+                        <input type="file" id="existingJD" name="existingJD" accept=".pdf,.doc,.docx,.txt" required>
+                        <div style="font-size: 3em; margin-bottom: 15px;">+</div>
+                        <div style="color: #EFA73F; font-weight: 600; font-size: 1.1em; margin-bottom: 10px;">
+                            Click to upload existing JD to improve
+                        </div>
+                        <div style="color: #a8b2d1; font-size: 0.9em;">
+                            Supports PDF, DOC, DOCX, TXT (Max 10MB)
+                        </div>
+                        <div id="fileName" style="margin-top: 15px; color: #258D58; font-weight: 600;"></div>
+                    </div>
+
+                    <label for="jobTitleFile">Job Title (optional - to refine):</label>
+                    <input type="text" id="jobTitleFile" placeholder="e.g., Senior Backend Engineer">
+
+                    <label for="experienceFile">Experience (optional - to refine):</label>
+                    <input type="text" id="experienceFile" placeholder="e.g., 4-6 years">
+
+                    <label for="skillsFile">Key Skills (optional - to refine):</label>
+                    <textarea id="skillsFile" placeholder="e.g., Python, Django, AWS"></textarea>
+
+                    <label for="locationFile">Location (optional - to refine):</label>
+                    <input type="text" id="locationFile" placeholder="e.g., Noida / Remote">
+
+                    <button type="submit" class="btn" id="uploadBtn">Improve Uploaded JD</button>
+                </form>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                AI is creating your job description...
+            </div>
+
+            <div class="result" id="result">
+                <h3>Your Job Description:</h3>
+                <pre id="resultText"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(tc => tc.classList.remove('active'));
+
+            if (tab === 'text') {
+                tabs[0].classList.add('active');
+                document.getElementById('textTab').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('fileTab').classList.add('active');
+            }
+        }
+
+        // File input change handler
+        document.getElementById('existingJD').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                document.getElementById('fileName').textContent = '✓ ' + fileName;
+            }
+        });
+
+        // Text form handler
+        document.getElementById('jdForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                jobTitle: document.getElementById('jobTitle').value,
+                experience: document.getElementById('experience').value,
+                skills: document.getElementById('skills').value,
+                location: document.getElementById('location').value,
+                additional: document.getElementById('additional').value
+            };
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('submitBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/generate-jd', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                document.getElementById('resultText').textContent = result.success ? result.jd : 'Error: ' + result.error;
+                document.getElementById('result').classList.add('active');
+            } catch (error) {
+                document.getElementById('resultText').textContent = 'Error: ' + error.message;
+                document.getElementById('result').classList.add('active');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('submitBtn').disabled = false;
+            }
+        });
+
+        // File upload form handler
+        document.getElementById('fileUploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData();
+            formData.append('existingJD', document.getElementById('existingJD').files[0]);
+            formData.append('jobTitle', document.getElementById('jobTitleFile').value || '');
+            formData.append('experience', document.getElementById('experienceFile').value || '');
+            formData.append('skills', document.getElementById('skillsFile').value || '');
+            formData.append('location', document.getElementById('locationFile').value || '');
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').classList.remove('active');
+            document.getElementById('uploadBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/generate-jd-file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('resultText').textContent = data.jd;
+                    document.getElementById('result').classList.add('active');
+                } else {
+                    document.getElementById('resultText').textContent = 'Error: ' + data.error;
+                    document.getElementById('result').classList.add('active');
+                }
+            } catch (error) {
+                document.getElementById('resultText').textContent = 'Error: ' + error.message;
+                document.getElementById('result').classList.add('active');
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
