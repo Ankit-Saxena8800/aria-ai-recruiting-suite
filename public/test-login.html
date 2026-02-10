@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Diagnostic Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-box {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background: #EFA73F;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #d89535;
+        }
+        .output {
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #22c55e; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+        h1 { color: #EFA73F; }
+        h2 { color: #258D58; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Aria AI - Login Diagnostic Test</h1>
+    <p>This page will help diagnose why login isn't working.</p>
+
+    <div class="test-box">
+        <h2>Test 1: Server Health Check</h2>
+        <button onclick="testHealth()">Test /health Endpoint</button>
+        <div id="health-output" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 2: Server Readiness Check</h2>
+        <button onclick="testReady()">Test /ready Endpoint</button>
+        <div id="ready-output" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 3: Login API Test</h2>
+        <p>Username: <input type="text" id="test-username" value="admin" style="padding: 5px; margin: 5px;"></p>
+        <p>Password: <input type="password" id="test-password" value="aria2024" style="padding: 5px; margin: 5px;"></p>
+        <button onclick="testLogin()">Test Login Endpoint</button>
+        <button onclick="testLoginVerbose()">Test Login (Verbose)</button>
+        <div id="login-output" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 4: Toast.js Check</h2>
+        <button onclick="testToast()">Test Toast Loading</button>
+        <div id="toast-output" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Test 5: CORS Check</h2>
+        <button onclick="testCORS()">Test CORS Headers</button>
+        <div id="cors-output" class="output"></div>
+    </div>
+
+    <div class="test-box">
+        <h2>Browser Information</h2>
+        <button onclick="showBrowserInfo()">Show Browser Info</button>
+        <div id="browser-output" class="output"></div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const output = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testHealth() {
+            clearLog('health-output');
+            log('health-output', '🔍 Testing /health endpoint...');
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/health');
+                const endTime = performance.now();
+                const data = await response.json();
+
+                log('health-output', `✅ Response Status: ${response.status}`, 'success');
+                log('health-output', `⏱️  Response Time: ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                log('health-output', `📊 Response Data:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                log('health-output', `❌ Error: ${error.message}`, 'error');
+                log('health-output', `Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testReady() {
+            clearLog('ready-output');
+            log('ready-output', '🔍 Testing /ready endpoint...');
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/ready');
+                const endTime = performance.now();
+                const data = await response.json();
+
+                log('ready-output', `✅ Response Status: ${response.status}`, 'success');
+                log('ready-output', `⏱️  Response Time: ${(endTime - startTime).toFixed(2)}ms`, 'info');
+                log('ready-output', `📊 Response Data:\n${JSON.stringify(data, null, 2)}`, 'success');
+            } catch (error) {
+                log('ready-output', `❌ Error: ${error.message}`, 'error');
+                log('ready-output', `Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            clearLog('login-output');
+            const username = document.getElementById('test-username').value;
+            const password = document.getElementById('test-password').value;
+
+            log('login-output', `🔍 Testing login with username: ${username}`);
+
+            try {
+                const startTime = performance.now();
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+                const endTime = performance.now();
+                const data = await response.json();
+
+                log('login-output', `📡 Response Status: ${response.status}`, response.status === 200 ? 'success' : 'error');
+                log('login-output', `⏱️  Response Time: ${(endTime - startTime).toFixed(2)}ms`, 'info');
+
+                if (data.success) {
+                    log('login-output', `✅ Login Successful!`, 'success');
+                    log('login-output', `👤 User: ${data.user.username}`, 'success');
+                    log('login-output', `🎭 Role: ${data.role}`, 'success');
+                    log('login-output', `🔑 Token (first 50 chars): ${data.token.substring(0, 50)}...`, 'success');
+
+                    // Try to decode JWT
+                    try {
+                        const parts = data.token.split('.');
+                        const payload = JSON.parse(atob(parts[1]));
+                        log('login-output', `📦 JWT Payload:\n${JSON.stringify(payload, null, 2)}`, 'info');
+                    } catch (e) {
+                        log('login-output', `⚠️  Could not decode JWT: ${e.message}`, 'error');
+                    }
+                } else {
+                    log('login-output', `❌ Login Failed: ${data.message}`, 'error');
+                }
+
+                log('login-output', `📊 Full Response:\n${JSON.stringify(data, null, 2)}`, 'info');
+            } catch (error) {
+                log('login-output', `❌ Network Error: ${error.message}`, 'error');
+                log('login-output', `Error Type: ${error.name}`, 'error');
+                log('login-output', `Stack: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testLoginVerbose() {
+            clearLog('login-output');
+            const username = document.getElementById('test-username').value;
+            const password = document.getElementById('test-password').value;
+
+            log('login-output', `🔍 VERBOSE LOGIN TEST`);
+            log('login-output', `Username: ${username}`);
+            log('login-output', `Password: ${password.replace(/./g, '*')}`);
+            log('login-output', `Endpoint: /api/login`);
+            log('login-output', `Method: POST`);
+            log('login-output', `Current URL: ${window.location.href}`);
+
+            try {
+                const requestBody = JSON.stringify({ username, password });
+                log('login-output', `Request Body: ${requestBody}`);
+
+                const startTime = performance.now();
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: requestBody,
+                });
+                const endTime = performance.now();
+
+                log('login-output', `\n📡 RESPONSE DETAILS:`);
+                log('login-output', `Status: ${response.status} ${response.statusText}`);
+                log('login-output', `Response Time: ${(endTime - startTime).toFixed(2)}ms`);
+                log('login-output', `Response Type: ${response.type}`);
+                log('login-output', `Response URL: ${response.url}`);
+
+                log('login-output', `\n📋 RESPONSE HEADERS:`);
+                response.headers.forEach((value, key) => {
+                    log('login-output', `  ${key}: ${value}`);
+                });
+
+                const data = await response.json();
+                log('login-output', `\n📊 RESPONSE BODY:\n${JSON.stringify(data, null, 2)}`);
+
+                if (data.success) {
+                    log('login-output', `\n✅ LOGIN SUCCESSFUL!`, 'success');
+                } else {
+                    log('login-output', `\n❌ LOGIN FAILED!`, 'error');
+                }
+            } catch (error) {
+                log('login-output', `\n❌ FATAL ERROR:`, 'error');
+                log('login-output', `Error Name: ${error.name}`, 'error');
+                log('login-output', `Error Message: ${error.message}`, 'error');
+                log('login-output', `Error Stack:\n${error.stack}`, 'error');
+            }
+        }
+
+        async function testToast() {
+            clearLog('toast-output');
+            log('toast-output', '🔍 Checking toast.js loading...');
+
+            try {
+                const response = await fetch('/components/toast.js');
+                log('toast-output', `📡 Response Status: ${response.status}`, response.status === 200 ? 'success' : 'error');
+
+                if (response.status === 200) {
+                    const content = await response.text();
+                    log('toast-output', `✅ toast.js loaded successfully`, 'success');
+                    log('toast-output', `📏 File size: ${content.length} bytes`, 'info');
+                    log('toast-output', `First 200 chars:\n${content.substring(0, 200)}...`, 'info');
+
+                    // Check if window.toast exists
+                    if (typeof window.toast !== 'undefined') {
+                        log('toast-output', `✅ window.toast is defined`, 'success');
+                        log('toast-output', `Toast object type: ${typeof window.toast}`, 'info');
+                    } else {
+                        log('toast-output', `❌ window.toast is NOT defined`, 'error');
+                    }
+                } else {
+                    log('toast-output', `❌ Failed to load toast.js`, 'error');
+                }
+            } catch (error) {
+                log('toast-output', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            clearLog('cors-output');
+            log('cors-output', '🔍 Testing CORS headers...');
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'OPTIONS'
+                });
+
+                log('cors-output', `📡 OPTIONS Response Status: ${response.status}`);
+                log('cors-output', `\n📋 CORS Headers:`);
+
+                const corsHeaders = [
+                    'Access-Control-Allow-Origin',
+                    'Access-Control-Allow-Methods',
+                    'Access-Control-Allow-Headers',
+                    'Access-Control-Allow-Credentials'
+                ];
+
+                let foundCorsHeaders = false;
+                response.headers.forEach((value, key) => {
+                    if (key.toLowerCase().includes('access-control')) {
+                        log('cors-output', `  ${key}: ${value}`, 'success');
+                        foundCorsHeaders = true;
+                    }
+                });
+
+                if (!foundCorsHeaders) {
+                    log('cors-output', `⚠️  No CORS headers found (this is usually OK for same-origin)`, 'info');
+                }
+
+                log('cors-output', `\n🌐 Origin: ${window.location.origin}`, 'info');
+            } catch (error) {
+                log('cors-output', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function showBrowserInfo() {
+            clearLog('browser-output');
+            log('browser-output', '🌐 BROWSER INFORMATION:');
+            log('browser-output', `User Agent: ${navigator.userAgent}`);
+            log('browser-output', `Platform: ${navigator.platform}`);
+            log('browser-output', `Language: ${navigator.language}`);
+            log('browser-output', `Online: ${navigator.onLine}`);
+            log('browser-output', `Cookies Enabled: ${navigator.cookieEnabled}`);
+            log('browser-output', `\n📍 LOCATION:`);
+            log('browser-output', `URL: ${window.location.href}`);
+            log('browser-output', `Protocol: ${window.location.protocol}`);
+            log('browser-output', `Host: ${window.location.host}`);
+            log('browser-output', `Port: ${window.location.port}`);
+            log('browser-output', `\n💾 STORAGE:`);
+            log('browser-output', `LocalStorage: ${typeof localStorage !== 'undefined' ? 'Available' : 'Not Available'}`);
+            log('browser-output', `SessionStorage: ${typeof sessionStorage !== 'undefined' ? 'Available' : 'Not Available'}`);
+
+            if (localStorage.length > 0) {
+                log('browser-output', `\nLocalStorage Items:`);
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    const value = localStorage.getItem(key);
+                    log('browser-output', `  ${key}: ${value.substring(0, 50)}...`);
+                }
+            }
+        }
+
+        // Auto-run some tests on load
+        window.addEventListener('load', () => {
+            console.log('🔍 Login Diagnostic Page Loaded');
+            showBrowserInfo();
+        });
+    </script>
+</body>
+</html>
