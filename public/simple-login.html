@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Login - Aria AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #2a2a2a;
+            padding: 40px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #EFA73F;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #444;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #EFA73F;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #d89535;
+        }
+        .message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #22c55e;
+            color: #000;
+            display: block;
+        }
+        .error {
+            background: #ef4444;
+            color: #fff;
+            display: block;
+        }
+        .info {
+            background: #3b82f6;
+            color: #fff;
+            display: block;
+        }
+        .debug {
+            background: #444;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .debug-title {
+            color: #EFA73F;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Simple Login Test</h1>
+
+        <div id="message" class="message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="username" value="admin" required>
+            </div>
+
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="password" value="aria2024" required>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="debug">
+            <div class="debug-title">Debug Log:</div>
+            <div id="debugLog"></div>
+        </div>
+    </div>
+
+    <script>
+        const debugLog = document.getElementById('debugLog');
+        const messageDiv = document.getElementById('message');
+
+        function log(msg) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `[${timestamp}] ${msg}<br>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+            console.log(msg);
+        }
+
+        function showMessage(msg, type) {
+            messageDiv.textContent = msg;
+            messageDiv.className = 'message ' + type;
+        }
+
+        log('Page loaded');
+        log('Current URL: ' + window.location.href);
+        log('Protocol: ' + window.location.protocol);
+        log('Host: ' + window.location.host);
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            log('=== LOGIN ATTEMPT ===');
+            log('Username: ' + username);
+            log('Password: ' + password.replace(/./g, '*'));
+
+            showMessage('Attempting login...', 'info');
+
+            try {
+                log('Making fetch request to /api/login');
+
+                const startTime = performance.now();
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                const endTime = performance.now();
+
+                log('Response received in ' + (endTime - startTime).toFixed(2) + 'ms');
+                log('Response status: ' + response.status);
+                log('Response statusText: ' + response.statusText);
+
+                const data = await response.json();
+                log('Response data: ' + JSON.stringify(data, null, 2));
+
+                if (data.success) {
+                    log('✅ LOGIN SUCCESS!');
+                    showMessage('Login successful! Redirecting...', 'success');
+
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('userRole', data.role);
+
+                    log('Token saved to localStorage');
+                    log('Redirecting to ' + (data.role === 'admin' ? '/admin-users.html' : '/index.html'));
+
+                    setTimeout(() => {
+                        window.location.href = data.role === 'admin' ? '/admin-users.html' : '/index.html';
+                    }, 1500);
+                } else {
+                    log('❌ LOGIN FAILED: ' + data.message);
+                    showMessage('Login failed: ' + data.message, 'error');
+                }
+            } catch (error) {
+                log('❌ NETWORK ERROR!');
+                log('Error type: ' + error.name);
+                log('Error message: ' + error.message);
+                log('Error stack: ' + error.stack);
+                showMessage('Network Error: ' + error.message, 'error');
+            }
+        });
+
+        // Auto-submit on load for quick testing
+        log('Ready to login');
+    </script>
+</body>
+</html>

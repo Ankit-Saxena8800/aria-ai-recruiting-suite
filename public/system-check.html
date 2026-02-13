@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Check - Aria AI</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: monospace;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        h1 { color: #EFA73F; margin-bottom: 20px; }
+        h2 { color: #258D58; margin: 30px 0 15px 0; }
+        .section {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        button {
+            background: #EFA73F;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+            font-size: 14px;
+        }
+        button:hover { background: #d89535; }
+        .result {
+            background: #1a1a1a;
+            border: 1px solid #3a3a3a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .pass { color: #22c55e; }
+        .fail { color: #ef4444; }
+        .warn { color: #eab308; }
+        .info { color: #3b82f6; }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .status-item {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #3a3a3a;
+        }
+        .status-item.pass { border-left: 4px solid #22c55e; }
+        .status-item.fail { border-left: 4px solid #ef4444; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        th { color: #EFA73F; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Aria AI System Check</h1>
+    <p style="margin-bottom: 20px;">Comprehensive system diagnostic tool</p>
+
+    <button onclick="runAllChecks()">▶️ Run All Checks</button>
+    <button onclick="clearAll()">🗑️ Clear All</button>
+
+    <div class="section">
+        <h2>1. Server Health</h2>
+        <button onclick="checkServerHealth()">Check Server Health</button>
+        <div id="health-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>2. Static Files</h2>
+        <button onclick="checkStaticFiles()">Check All Static Files</button>
+        <div id="static-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>3. JavaScript Dependencies</h2>
+        <button onclick="checkJavaScript()">Check JavaScript Files</button>
+        <div id="js-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>4. API Endpoints</h2>
+        <button onclick="checkAPI()">Check All API Endpoints</button>
+        <div id="api-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>5. Tool Pages</h2>
+        <button onclick="checkToolPages()">Check All Tool Pages</button>
+        <div id="tools-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>6. Authentication Test</h2>
+        <button onclick="testAuth()">Test Login/Auth</button>
+        <div id="auth-result" class="result"></div>
+    </div>
+
+    <div class="section">
+        <h2>7. Overall Status Summary</h2>
+        <div id="summary-result" class="status-grid"></div>
+    </div>
+
+    <script>
+        const results = {};
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type;
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clear(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        function clearAll() {
+            ['health-result', 'static-result', 'js-result', 'api-result', 'tools-result', 'auth-result', 'summary-result'].forEach(clear);
+        }
+
+        async function checkServerHealth() {
+            clear('health-result');
+            log('health-result', '🔍 Checking server health...', 'info');
+
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+
+                if (data.status === 'ok') {
+                    log('health-result', '✅ Server is healthy', 'pass');
+                    log('health-result', `Uptime: ${Math.floor(data.uptime)} seconds`, 'info');
+                    log('health-result', `Environment: ${data.environment}`, 'info');
+                    results.health = 'pass';
+                } else {
+                    log('health-result', '❌ Server health check failed', 'fail');
+                    results.health = 'fail';
+                }
+            } catch (error) {
+                log('health-result', `❌ Error: ${error.message}`, 'fail');
+                results.health = 'fail';
+            }
+        }
+
+        async function checkStaticFiles() {
+            clear('static-result');
+            log('static-result', '🔍 Checking static files...', 'info');
+
+            const files = [
+                '/login.html',
+                '/index.html',
+                '/admin-users.html',
+                '/profile.html',
+                '/jd-generator.html',
+                '/screener.html',
+                '/interview.html',
+                '/components/toast.js',
+                '/components/toast.css',
+                '/styles/global.css',
+                '/styles/components.css'
+            ];
+
+            let passed = 0;
+            let failed = 0;
+
+            for (const file of files) {
+                try {
+                    const response = await fetch(file);
+                    if (response.status === 200) {
+                        log('static-result', `✅ ${file} - OK (${response.status})`, 'pass');
+                        passed++;
+                    } else {
+                        log('static-result', `❌ ${file} - ERROR (${response.status})`, 'fail');
+                        failed++;
+                    }
+                } catch (error) {
+                    log('static-result', `❌ ${file} - ${error.message}`, 'fail');
+                    failed++;
+                }
+            }
+
+            log('static-result', `\n📊 Summary: ${passed} passed, ${failed} failed`, passed === files.length ? 'pass' : 'fail');
+            results.static = passed === files.length ? 'pass' : 'fail';
+        }
+
+        async function checkJavaScript() {
+            clear('js-result');
+            log('js-result', '🔍 Checking JavaScript files and functions...', 'info');
+
+            // Check if toast.js loaded
+            if (typeof window.toast !== 'undefined') {
+                log('js-result', '✅ window.toast is defined', 'pass');
+            } else {
+                log('js-result', '❌ window.toast is NOT defined', 'fail');
+            }
+
+            if (typeof window.toastSuccess === 'function') {
+                log('js-result', '✅ toastSuccess() function exists', 'pass');
+            } else {
+                log('js-result', '❌ toastSuccess() function missing', 'fail');
+            }
+
+            if (typeof window.toastError === 'function') {
+                log('js-result', '✅ toastError() function exists', 'pass');
+            } else {
+                log('js-result', '❌ toastError() function missing', 'fail');
+            }
+
+            // Check localStorage
+            if (typeof Storage !== 'undefined') {
+                log('js-result', '✅ localStorage is available', 'pass');
+            } else {
+                log('js-result', '❌ localStorage is NOT available', 'fail');
+            }
+
+            // Check fetch API
+            if (typeof fetch === 'function') {
+                log('js-result', '✅ Fetch API is available', 'pass');
+            } else {
+                log('js-result', '❌ Fetch API is NOT available', 'fail');
+            }
+
+            results.javascript = typeof window.toast !== 'undefined' ? 'pass' : 'fail';
+        }
+
+        async function checkAPI() {
+            clear('api-result');
+            log('api-result', '🔍 Checking API endpoints...', 'info');
+
+            const endpoints = [
+                { url: '/health', method: 'GET', name: 'Health Check' },
+                { url: '/ready', method: 'GET', name: 'Readiness Check' },
+                { url: '/api/login', method: 'POST', name: 'Login', body: {username: 'test', password: 'test'} }
+            ];
+
+            let passed = 0;
+            let failed = 0;
+
+            for (const endpoint of endpoints) {
+                try {
+                    const options = {
+                        method: endpoint.method,
+                        headers: { 'Content-Type': 'application/json' }
+                    };
+                    if (endpoint.body) {
+                        options.body = JSON.stringify(endpoint.body);
+                    }
+
+                    const response = await fetch(endpoint.url, options);
+                    const data = await response.json();
+
+                    if (response.status < 500) {
+                        log('api-result', `✅ ${endpoint.name} (${endpoint.method} ${endpoint.url}) - ${response.status}`, 'pass');
+                        passed++;
+                    } else {
+                        log('api-result', `❌ ${endpoint.name} - ${response.status}`, 'fail');
+                        failed++;
+                    }
+                } catch (error) {
+                    log('api-result', `❌ ${endpoint.name} - ${error.message}`, 'fail');
+                    failed++;
+                }
+            }
+
+            log('api-result', `\n📊 Summary: ${passed} passed, ${failed} failed`, passed > 0 ? 'pass' : 'fail');
+            results.api = passed > 0 ? 'pass' : 'fail';
+        }
+
+        async function checkToolPages() {
+            clear('tools-result');
+            log('tools-result', '🔍 Checking all tool pages...', 'info');
+
+            const tools = [
+                { name: 'JD Generator', url: '/jd-generator.html' },
+                { name: 'Resume Screener', url: '/screener.html' },
+                { name: 'Interview Questions', url: '/interview.html' },
+                { name: 'Offer Letter', url: '/offer-letter.html' },
+                { name: 'Email Templates', url: '/email-templates.html' },
+                { name: 'Candidate Sourcer', url: '/sourcer.html' },
+                { name: 'Salary Benchmark', url: '/salary.html' },
+                { name: 'Reference Check', url: '/reference.html' },
+                { name: 'Feedback Form', url: '/feedback.html' },
+                { name: 'Onboarding Checklist', url: '/onboarding.html' },
+                { name: 'Candidate Compare', url: '/compare.html' },
+                { name: 'Dashboard', url: '/dashboard-v2.html' }
+            ];
+
+            let passed = 0;
+            let failed = 0;
+
+            for (const tool of tools) {
+                try {
+                    const response = await fetch(tool.url);
+                    if (response.status === 200) {
+                        log('tools-result', `✅ ${tool.name} - OK`, 'pass');
+                        passed++;
+                    } else {
+                        log('tools-result', `❌ ${tool.name} - ${response.status}`, 'fail');
+                        failed++;
+                    }
+                } catch (error) {
+                    log('tools-result', `❌ ${tool.name} - ${error.message}`, 'fail');
+                    failed++;
+                }
+            }
+
+            log('tools-result', `\n📊 Summary: ${passed}/${tools.length} tools accessible`, passed === tools.length ? 'pass' : 'warn');
+            results.tools = passed === tools.length ? 'pass' : 'warn';
+        }
+
+        async function testAuth() {
+            clear('auth-result');
+            log('auth-result', '🔍 Testing authentication...', 'info');
+
+            try {
+                // Test login
+                log('auth-result', 'Testing login with admin credentials...', 'info');
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: 'admin', password: 'aria2024' })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    log('auth-result', '✅ Login successful', 'pass');
+                    log('auth-result', `Role: ${data.role}`, 'info');
+                    log('auth-result', `Token: ${data.token.substring(0, 30)}...`, 'info');
+
+                    // Test token by accessing profile
+                    const profileResponse = await fetch('/api/profile', {
+                        headers: { 'Authorization': `Bearer ${data.token}` }
+                    });
+                    const profileData = await profileResponse.json();
+
+                    if (profileData.success) {
+                        log('auth-result', '✅ Token validation works', 'pass');
+                        log('auth-result', `User: ${profileData.user.username}`, 'info');
+                        results.auth = 'pass';
+                    } else {
+                        log('auth-result', '❌ Token validation failed', 'fail');
+                        results.auth = 'fail';
+                    }
+                } else {
+                    log('auth-result', `❌ Login failed: ${data.message}`, 'fail');
+                    results.auth = 'fail';
+                }
+            } catch (error) {
+                log('auth-result', `❌ Error: ${error.message}`, 'fail');
+                results.auth = 'fail';
+            }
+        }
+
+        function updateSummary() {
+            const summary = document.getElementById('summary-result');
+            summary.innerHTML = '';
+
+            const checks = [
+                { name: 'Server Health', key: 'health' },
+                { name: 'Static Files', key: 'static' },
+                { name: 'JavaScript', key: 'javascript' },
+                { name: 'API Endpoints', key: 'api' },
+                { name: 'Tool Pages', key: 'tools' },
+                { name: 'Authentication', key: 'auth' }
+            ];
+
+            checks.forEach(check => {
+                const status = results[check.key] || 'pending';
+                const icon = status === 'pass' ? '✅' : status === 'fail' ? '❌' : status === 'warn' ? '⚠️' : '⏳';
+                const statusText = status === 'pass' ? 'PASS' : status === 'fail' ? 'FAIL' : status === 'warn' ? 'WARNING' : 'PENDING';
+
+                summary.innerHTML += `
+                    <div class="status-item ${status}">
+                        <div style="font-size: 24px; margin-bottom: 10px;">${icon}</div>
+                        <div style="font-weight: bold; margin-bottom: 5px;">${check.name}</div>
+                        <div style="color: #888;">${statusText}</div>
+                    </div>
+                `;
+            });
+        }
+
+        async function runAllChecks() {
+            clearAll();
+            log('summary-result', 'Running all checks...', 'info');
+
+            await checkServerHealth();
+            await checkStaticFiles();
+            await checkJavaScript();
+            await checkAPI();
+            await checkToolPages();
+            await testAuth();
+
+            updateSummary();
+        }
+
+        // Run checks on load
+        window.addEventListener('load', () => {
+            console.log('System Check page loaded');
+            checkJavaScript();
+        });
+    </script>
+</body>
+</html>
