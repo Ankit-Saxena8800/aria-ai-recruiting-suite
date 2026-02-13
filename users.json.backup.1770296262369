@@ -1,0 +1,68 @@
+{
+  "blacklist": [],
+  "users": [
+    {
+      "id": "user_1770274919049_d7rrkh91a",
+      "firstName": "Ankit",
+      "lastName": "Saxena",
+      "email": "ankit.saxena@stage.in",
+      "username": "ankitsaxena",
+      "password": "Stage@123",
+      "department": "Human Resource",
+      "status": "rejected",
+      "role": "user",
+      "requestedAt": "2026-02-05T07:01:59.049Z",
+      "updatedAt": "2026-02-05T07:03:06.765Z"
+    },
+    {
+      "id": "user_1770278125943_dsvktazny",
+      "firstName": "Test",
+      "lastName": "User",
+      "email": "test.user@stage.in",
+      "username": "testuser",
+      "password": "Test@123",
+      "department": "Engineering",
+      "status": "approved",
+      "role": "user",
+      "requestedAt": "2026-02-05T07:55:25.943Z",
+      "updatedAt": "2026-02-05T07:55:45.766Z"
+    },
+    {
+      "id": "user_1770278156162_4on5hkuda",
+      "firstName": "Pending",
+      "lastName": "User",
+      "email": "pending@stage.in",
+      "username": "pendinguser",
+      "password": "Pending@123",
+      "department": "HR",
+      "status": "approved",
+      "role": "user",
+      "requestedAt": "2026-02-05T07:55:56.162Z",
+      "updatedAt": "2026-02-05T08:57:00.920Z"
+    },
+    {
+      "id": "user_1770281720431_sanoq3fij",
+      "firstName": "Ankit",
+      "lastName": "Saxena",
+      "email": "ankitsaxena399@gmail.com",
+      "username": "ankitsaxena399",
+      "password": "290e8814a955a9ce5e67b6f7cae4b326e1f416525ec2528377396c01a74fd39b",
+      "department": "Not Specified",
+      "status": "rejected",
+      "role": "user",
+      "ssoProvider": "google",
+      "requestedAt": "2026-02-05T08:55:20.432Z",
+      "updatedAt": "2026-02-05T08:57:41.713Z"
+    }
+  ],
+  "admins": [
+    {
+      "id": "admin001",
+      "username": "admin",
+      "password": "aria2024",
+      "email": "admin@stage.in",
+      "role": "admin",
+      "status": "approved"
+    }
+  ]
+}

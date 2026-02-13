@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Toast Test</title>
+    <link rel="stylesheet" href="/components/toast.css">
+</head>
+<body style="background: #1a1a1a; color: #fff; padding: 20px; font-family: monospace;">
+    <h1>Toast.js Test</h1>
+
+    <button onclick="testToast()" style="padding: 10px 20px; margin: 10px; font-size: 16px;">Test Toast Functions</button>
+
+    <div id="results" style="background: #2a2a2a; padding: 20px; margin-top: 20px; border-radius: 5px;"></div>
+
+    <script src="/components/toast.js"></script>
+    <script>
+        function log(msg, color = '#fff') {
+            const results = document.getElementById('results');
+            results.innerHTML += `<div style="color: ${color}; margin: 5px 0;">${msg}</div>`;
+        }
+
+        // Test immediately on load
+        window.addEventListener('load', () => {
+            log('=== TOAST.JS LOAD TEST ===', '#EFA73F');
+            log('');
+
+            // Check if window.toast exists
+            if (typeof window.toast !== 'undefined') {
+                log('✅ window.toast is defined', '#22c55e');
+            } else {
+                log('❌ window.toast is NOT defined', '#ef4444');
+            }
+
+            // Check if toastSuccess exists
+            if (typeof window.toastSuccess === 'function') {
+                log('✅ window.toastSuccess is a function', '#22c55e');
+            } else {
+                log('❌ window.toastSuccess is NOT a function', '#ef4444');
+            }
+
+            // Check if toastError exists
+            if (typeof window.toastError === 'function') {
+                log('✅ window.toastError is a function', '#22c55e');
+            } else {
+                log('❌ window.toastError is NOT a function', '#ef4444');
+            }
+
+            // Try to call toast function
+            try {
+                log('');
+                log('Attempting to show success toast...', '#3b82f6');
+                if (typeof window.toastSuccess === 'function') {
+                    window.toastSuccess('Test Success', 'This is a test message');
+                    log('✅ Toast shown successfully!', '#22c55e');
+                } else {
+                    log('❌ Cannot show toast - function missing', '#ef4444');
+                }
+            } catch (error) {
+                log(`❌ Error showing toast: ${error.message}`, '#ef4444');
+            }
+        });
+
+        function testToast() {
+            if (typeof window.toastSuccess === 'function') {
+                window.toastSuccess('Button Click', 'You clicked the test button!');
+                window.toastError('Error Test', 'This is an error toast');
+                log('');
+                log('✅ Toasts triggered from button click', '#22c55e');
+            } else {
+                alert('Toast functions not available!');
+            }
+        }
+    </script>
+</body>
+</html>

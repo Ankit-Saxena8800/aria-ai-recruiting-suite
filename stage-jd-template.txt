@@ -1,0 +1,42 @@
+# Sample Job Description Template
+# Replace this with your actual STAGE job description
+
+STAGE - OTT & Entertainment Platform
+Location: Noida / Remote
+
+[JOB TITLE]
+Senior Backend Engineer
+
+[EXPERIENCE]
+4-6 years of professional software development experience
+
+[MUST HAVE SKILLS]
+- Python and Django/Flask
+- RESTful API design and development
+- Database design (PostgreSQL, MongoDB)
+- AWS services (EC2, S3, Lambda, RDS)
+- Video streaming protocols and CDN integration
+- Microservices architecture
+
+[NICE TO HAVE]
+- Experience with video encoding/transcoding
+- Knowledge of HLS/DASH protocols
+- Redis, Celery for async processing
+- Docker, Kubernetes
+- Experience in OTT/media/entertainment domain
+
+[RESPONSIBILITIES]
+- Design and develop scalable backend services for our OTT platform
+- Build APIs for video streaming, user management, content delivery
+- Optimize performance for high-traffic scenarios (millions of concurrent users)
+- Work with product and frontend teams in an Agile environment
+- Mentor junior engineers and lead technical initiatives
+
+[COMPANY]
+STAGE is a fast-growing OTT platform focused on [content type]. We're scaling rapidly and need engineers who thrive in high-growth environments.
+
+[CULTURE]
+- Fast-paced startup environment
+- Direct impact on product
+- Ownership and autonomy
+- Learning and growth opportunities
