@@ -11,11 +11,22 @@ class ToastManager {
     }
 
     init() {
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.createContainer());
+        } else {
+            this.createContainer();
+        }
+    }
+
+    createContainer() {
         // Create container if it doesn't exist
         if (!document.querySelector('.toast-container')) {
             this.container = document.createElement('div');
             this.container.className = 'toast-container';
-            document.body.appendChild(this.container);
+            if (document.body) {
+                document.body.appendChild(this.container);
+            }
         } else {
             this.container = document.querySelector('.toast-container');
         }
@@ -29,14 +40,22 @@ class ToastManager {
      * @param {number} duration - Duration in ms (default: 5000)
      */
     show(type, title, message, duration = 5000) {
-        const toast = this.createToast(type, title, message, duration);
-        this.container.appendChild(toast);
-        this.toasts.push(toast);
+        // Ensure container exists
+        if (!this.container) {
+            this.createContainer();
+        }
 
-        // Auto remove after duration
-        setTimeout(() => {
-            this.remove(toast);
-        }, duration);
+        const toast = this.createToast(type, title, message, duration);
+
+        if (this.container) {
+            this.container.appendChild(toast);
+            this.toasts.push(toast);
+
+            // Auto remove after duration
+            setTimeout(() => {
+                this.remove(toast);
+            }, duration);
+        }
 
         return toast;
     }
