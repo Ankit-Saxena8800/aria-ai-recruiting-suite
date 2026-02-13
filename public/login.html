@@ -506,8 +506,14 @@
                     localStorage.setItem('authToken', data.token);
                     localStorage.setItem('userRole', data.role);
 
-                    // Show success toast
-                    toastSuccess('Login Successful!', `Welcome back${data.role === 'admin' ? ', Admin' : ''}!`);
+                    // Show success toast (if available)
+                    try {
+                        if (typeof toastSuccess === 'function') {
+                            toastSuccess('Login Successful!', `Welcome back${data.role === 'admin' ? ', Admin' : ''}!`);
+                        }
+                    } catch(e) {
+                        console.log('Toast not available');
+                    }
 
                     // Redirect based on role after short delay
                     setTimeout(() => {
@@ -516,12 +522,18 @@
                         } else {
                             window.location.href = '/index.html';
                         }
-                    }, 1000);
+                    }, 500);
                 } else {
-                    // Show error toast
-                    toastError('Login Failed', data.message || 'Invalid username or password');
+                    // Show error toast (if available)
+                    try {
+                        if (typeof toastError === 'function') {
+                            toastError('Login Failed', data.message || 'Invalid username or password');
+                        }
+                    } catch(e) {
+                        console.log('Toast not available');
+                    }
 
-                    // Also show in page error message
+                    // Show in page error message
                     errorMessage.textContent = data.message || 'Invalid username or password. Please try again.';
                     errorMessage.classList.add('show');
 
@@ -532,7 +544,8 @@
                     }, 10);
                 }
             } catch (error) {
-                errorMessage.textContent = 'Network error. Please try again.';
+                console.error('Login error:', error);
+                errorMessage.textContent = 'Network error. Please try again. Error: ' + error.message;
                 errorMessage.classList.add('show');
             }
         });
