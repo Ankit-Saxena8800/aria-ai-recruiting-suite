@@ -148,18 +148,176 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
+        /* Mode Indicators */
+        .mode-indicators {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .mode-badge {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .mode-badge.active {
+            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
+        }
+
+        .mode-badge.inactive {
+            background: rgba(255, 255, 255, 0.05);
+            color: #888;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* File Upload Zone */
+        .file-upload-zone {
+            background: rgba(239, 167, 63, 0.05);
+            border: 2px dashed rgba(239, 167, 63, 0.3);
+            border-radius: 20px;
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(239, 167, 63, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .file-upload-zone:hover::before {
+            opacity: 1;
+        }
+
+        .file-upload-zone:hover {
+            border-color: #EFA73F;
+            background: rgba(239, 167, 63, 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(239, 167, 63, 0.2);
+        }
+
+        .file-upload-zone.drag-over {
+            border-color: #258D58;
+            background: rgba(37, 141, 88, 0.1);
+            transform: scale(1.02);
+        }
+
+        .file-upload-zone.file-selected {
+            border-color: #258D58;
+            background: rgba(37, 141, 88, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            margin-bottom: 16px;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-zone:hover .upload-icon {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .upload-text {
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            color: #a8b2d1;
+            font-size: 0.95em;
+            margin-bottom: 16px;
+        }
+
+        .file-name {
+            color: #258D58;
+            font-weight: 600;
+            margin-top: 16px;
+            font-size: 1.05em;
+            display: none;
+        }
+
+        .file-name.show {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .file-upload-zone input[type="file"] {
+            display: none;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 40px 0;
+            color: #a8b2d1;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 20px;
+        }
+
+        /* Manual Input Fields */
+        .manual-fields {
+            transition: all 0.3s ease;
+        }
+
+        .manual-fields.faded {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
         label {
             display: block;
             margin-bottom: 12px;
             color: #EFA73F;
             font-weight: 600;
-            font-size: 1.1em;
+            font-size: 1.05em;
             letter-spacing: 0.3px;
         }
 
-        input, textarea, select {
+        .optional-label {
+            color: #888;
+            font-size: 0.85em;
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        input, select {
             width: 100%;
-            padding: 18px 20px;
+            padding: 16px 20px;
             border-radius: 12px;
             border: 2px solid rgba(255, 255, 255, 0.1);
             background: rgba(255, 255, 255, 0.04);
@@ -170,13 +328,7 @@
             transition: all 0.3s ease;
         }
 
-        textarea {
-            min-height: 220px;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
-        input:focus, textarea:focus, select:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: #EFA73F;
             background: rgba(255, 255, 255, 0.06);
@@ -187,7 +339,7 @@
             transform: translateY(-2px);
         }
 
-        input::placeholder, textarea::placeholder {
+        input::placeholder {
             color: rgba(255, 255, 255, 0.4);
         }
 
@@ -196,7 +348,8 @@
             color: white;
         }
 
-        .btn {
+        /* Submit Button */
+        .submit-btn {
             background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
             color: white;
             padding: 18px 48px;
@@ -205,6 +358,7 @@
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
+            width: 100%;
             margin-top: 24px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 8px 24px rgba(239, 167, 63, 0.3);
@@ -212,7 +366,7 @@
             overflow: hidden;
         }
 
-        .btn::before {
+        .submit-btn::before {
             content: '';
             position: absolute;
             top: 50%;
@@ -225,26 +379,32 @@
             transition: width 0.6s, height 0.6s;
         }
 
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
+        .submit-btn:hover::before {
+            width: 400px;
+            height: 400px;
         }
 
-        .btn:hover {
+        .submit-btn:hover {
             transform: translateY(-3px) scale(1.02);
             box-shadow: 0 16px 40px rgba(239, 167, 63, 0.4);
         }
 
-        .btn:active {
+        .submit-btn:active {
             transform: translateY(-1px) scale(0.98);
         }
 
-        .btn:disabled {
+        .submit-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
 
+        .submit-btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Loading State */
         .loading {
             display: none;
             text-align: center;
@@ -258,6 +418,22 @@
             animation: fadeIn 0.4s ease-out;
         }
 
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #EFA73F;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Result Section */
         .result {
             display: none;
             margin-top: 40px;
@@ -423,111 +599,7 @@
             margin-bottom: 10px;
         }
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #EFA73F;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            color: #a8b2d1;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(239, 167, 63, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .file-upload-area {
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px dashed rgba(239, 167, 63, 0.4);
-            border-radius: 16px;
-            padding: 48px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 24px;
-        }
-
-        .file-upload-area:hover {
-            border-color: #EFA73F;
-            background: rgba(239, 167, 63, 0.08);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(239, 167, 63, 0.2);
-        }
-
-        .file-upload-area input[type="file"] {
-            display: none;
-        }
-
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 32px;
@@ -549,12 +621,13 @@
             transform: translateY(0);
         }
 
+        /* Info Box */
         .info-box {
             background: rgba(239, 167, 63, 0.1);
             border: 1px solid rgba(239, 167, 63, 0.3);
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
             color: #b8c1ec;
             line-height: 1.8;
         }
@@ -563,7 +636,7 @@
             color: #EFA73F;
         }
 
-        /* Pulsing Nodes - Q&A Theme */
+        /* Pulsing Nodes */
         .pulsing-node {
             position: fixed;
             width: 8px;
@@ -612,6 +685,34 @@
                 opacity: 0;
             }
         }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -624,10 +725,11 @@
 
         <div class="header">
             <h1>Interview Generator</h1>
-            <p style="color: #a8b2d1;">Create comprehensive interview questions with scoring rubrics</p>
+            <p>Create comprehensive interview questions with scoring rubrics</p>
         </div>
 
         <div class="card">
+            <!-- Info Box -->
             <div class="info-box">
                 <strong>Interview Types:</strong><br>
                 • <strong>Comprehensive:</strong> 20-30 questions covering all aspects<br>
@@ -636,68 +738,97 @@
                 • <strong>Leadership:</strong> For senior/managerial roles
             </div>
 
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('text')">Paste Text</div>
-                <div class="tab" onclick="switchTab('file')">Upload JD File</div>
+            <!-- Mode Indicators -->
+            <div class="mode-indicators">
+                <div class="mode-badge active" id="manualBadge">✍️ Manual Input</div>
+                <div class="mode-badge inactive" id="fileBadge">📄 File Mode</div>
             </div>
 
-            <!-- Text Input Tab -->
-            <div id="textTab" class="tab-content active">
-                <form id="interviewForm">
-                    <label for="jobDescription">Job Description or Role Requirements:</label>
-                    <textarea
-                        id="jobDescription"
-                        name="jobDescription"
-                        placeholder="Paste the job description or describe the role..."
-                        required
-                    ></textarea>
+            <form id="interviewForm">
+                <!-- File Upload Zone -->
+                <div class="file-upload-zone" id="fileUploadZone" onclick="document.getElementById('jdFile').click()">
+                    <input type="file" id="jdFile" name="jdFile" accept=".pdf,.doc,.docx,.txt">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Upload JD File</div>
+                    <div class="upload-subtext">Drag and drop or click to browse</div>
+                    <div class="upload-subtext">Supports PDF, DOC, DOCX, TXT (Max 10MB)</div>
+                    <div class="file-name" id="fileName"></div>
+                </div>
 
-                    <label for="interviewType">Interview Type:</label>
+                <!-- Divider -->
+                <div class="divider">
+                    <span>OR ENTER DETAILS MANUALLY</span>
+                </div>
+
+                <!-- Manual Input Fields -->
+                <div class="manual-fields" id="manualFields">
+                    <label for="jobTitle">
+                        Job Title
+                        <span class="optional-label" id="jobTitleOptional" style="display: none;">(optional - file uploaded)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="jobTitle"
+                        name="jobTitle"
+                        placeholder="e.g., Senior Software Engineer"
+                    >
+
+                    <label for="experience">
+                        Experience Required
+                        <span class="optional-label" id="experienceOptional" style="display: none;">(optional - file uploaded)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="experience"
+                        name="experience"
+                        placeholder="e.g., 5-7 years"
+                    >
+
+                    <label for="skills">
+                        Key Skills
+                        <span class="optional-label" id="skillsOptional" style="display: none;">(optional - file uploaded)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="skills"
+                        name="skills"
+                        placeholder="e.g., React, Node.js, AWS, MongoDB"
+                    >
+
+                    <label for="location">
+                        Location
+                        <span class="optional-label" id="locationOptional" style="display: none;">(optional - file uploaded)</span>
+                    </label>
+                    <input
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="e.g., Bangalore / Remote"
+                    >
+
+                    <label for="interviewType">Interview Type</label>
                     <select id="interviewType" name="interviewType" required>
                         <option value="comprehensive">Comprehensive (All aspects)</option>
                         <option value="technical">Technical (Deep technical focus)</option>
                         <option value="behavioral">Behavioral (Soft skills focus)</option>
                         <option value="leadership">Leadership (Manager/Lead roles)</option>
                     </select>
+                </div>
 
-                    <button type="submit" class="btn" id="submitBtn">Generate Interview Questions</button>
-                </form>
-            </div>
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="btnText">Generate Interview Questions</span>
+                </button>
+            </form>
 
-            <!-- File Upload Tab -->
-            <div id="fileTab" class="tab-content">
-                <form id="fileUploadForm" enctype="multipart/form-data">
-                    <label>Upload JD File:</label>
-                    <div class="file-upload-area" onclick="document.getElementById('jdFile').click()">
-                        <input type="file" id="jdFile" name="jdFile" accept=".pdf,.doc,.docx,.txt" required>
-                        <div style="font-size: 3em; margin-bottom: 15px;">+</div>
-                        <div style="color: #EFA73F; font-weight: 600; font-size: 1.1em; margin-bottom: 10px;">
-                            Click to upload or drag & drop
-                        </div>
-                        <div style="color: #a8b2d1; font-size: 0.9em;">
-                            Supports PDF, DOC, DOCX, TXT (Max 10MB)
-                        </div>
-                        <div id="fileName" style="margin-top: 15px; color: #258D58; font-weight: 600;"></div>
-                    </div>
-
-                    <label for="interviewTypeFile">Interview Type:</label>
-                    <select id="interviewTypeFile" name="interviewType" required>
-                        <option value="comprehensive">Comprehensive (All aspects)</option>
-                        <option value="technical">Technical (Deep technical focus)</option>
-                        <option value="behavioral">Behavioral (Soft skills focus)</option>
-                        <option value="leadership">Leadership (Manager/Lead roles)</option>
-                    </select>
-
-                    <button type="submit" class="btn" id="uploadBtn">Generate from Uploaded File</button>
-                </form>
-            </div>
-
+            <!-- Loading State -->
             <div class="loading" id="loading">
                 <div class="spinner"></div>
                 AI is generating interview questions...<br>
                 This may take 15-30 seconds...
             </div>
 
+            <!-- Result Section -->
             <div class="result" id="result">
                 <div class="result-header">
                     <h3>Your Interview Questions</h3>
@@ -712,9 +843,143 @@
     <script>
         const form = document.getElementById('interviewForm');
         const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
         const loading = document.getElementById('loading');
         const result = document.getElementById('result');
         const resultText = document.getElementById('resultText');
+        const fileUploadZone = document.getElementById('fileUploadZone');
+        const jdFileInput = document.getElementById('jdFile');
+        const fileName = document.getElementById('fileName');
+        const manualFields = document.getElementById('manualFields');
+        const manualBadge = document.getElementById('manualBadge');
+        const fileBadge = document.getElementById('fileBadge');
+
+        let isFileMode = false;
+
+        // File upload handling
+        jdFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = '✓ ' + file.name;
+                fileName.classList.add('show');
+                fileUploadZone.classList.add('file-selected');
+
+                // Switch to file mode
+                isFileMode = true;
+                manualFields.classList.add('faded');
+                manualBadge.classList.remove('active');
+                manualBadge.classList.add('inactive');
+                fileBadge.classList.remove('inactive');
+                fileBadge.classList.add('active');
+                btnText.textContent = 'Generate from Uploaded JD';
+
+                // Show optional labels
+                document.getElementById('jobTitleOptional').style.display = 'inline';
+                document.getElementById('experienceOptional').style.display = 'inline';
+                document.getElementById('skillsOptional').style.display = 'inline';
+                document.getElementById('locationOptional').style.display = 'inline';
+            }
+        });
+
+        // Drag and drop handling
+        fileUploadZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileUploadZone.classList.add('drag-over');
+        });
+
+        fileUploadZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileUploadZone.classList.remove('drag-over');
+        });
+
+        fileUploadZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileUploadZone.classList.remove('drag-over');
+
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                jdFileInput.files = e.dataTransfer.files;
+                fileName.textContent = '✓ ' + file.name;
+                fileName.classList.add('show');
+                fileUploadZone.classList.add('file-selected');
+
+                // Switch to file mode
+                isFileMode = true;
+                manualFields.classList.add('faded');
+                manualBadge.classList.remove('active');
+                manualBadge.classList.add('inactive');
+                fileBadge.classList.remove('inactive');
+                fileBadge.classList.add('active');
+                btnText.textContent = 'Generate from Uploaded JD';
+
+                // Show optional labels
+                document.getElementById('jobTitleOptional').style.display = 'inline';
+                document.getElementById('experienceOptional').style.display = 'inline';
+                document.getElementById('skillsOptional').style.display = 'inline';
+                document.getElementById('locationOptional').style.display = 'inline';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Show loading, hide result
+            loading.classList.add('active');
+            result.classList.remove('active');
+            submitBtn.disabled = true;
+
+            try {
+                let response;
+
+                if (isFileMode && jdFileInput.files.length > 0) {
+                    // File mode - use file upload API
+                    const formData = new FormData();
+                    formData.append('jdFile', jdFileInput.files[0]);
+                    formData.append('interviewType', document.getElementById('interviewType').value);
+
+                    response = await fetch('/api/generate-interview-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // Manual mode - use manual API
+                    const jobDescription = `
+Job Title: ${document.getElementById('jobTitle').value}
+Experience: ${document.getElementById('experience').value}
+Skills: ${document.getElementById('skills').value}
+Location: ${document.getElementById('location').value}
+                    `.trim();
+
+                    response = await fetch('/api/generate-interview', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            jobDescription,
+                            interviewType: document.getElementById('interviewType').value
+                        }),
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    formatResult(data.questions);
+                    result.classList.add('active');
+                } else {
+                    resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
+                    result.classList.add('active');
+                }
+            } catch (error) {
+                resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
+                result.classList.add('active');
+            } finally {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
 
         // Show toast notification
         function showToast(message) {
@@ -731,7 +996,7 @@
             try {
                 await navigator.clipboard.writeText(text);
                 const originalText = button.innerHTML;
-                button.innerHTML = '<span style="font-size: 1em;">✓</span> Copied!';
+                button.innerHTML = '<span style="font-size: 1.1em;">✓</span> Copied!';
                 button.classList.add('copied');
                 showToast('Copied to clipboard!');
 
@@ -844,106 +1109,6 @@
                 .replace(/\n\n/g, '<div style="height: 12px;"></div>')
                 .replace(/\n/g, '<br>');
         }
-
-        // Tab switching
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-
-            if (tab === 'text') {
-                tabs[0].classList.add('active');
-                document.getElementById('textTab').classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('fileTab').classList.add('active');
-            }
-        }
-
-        // File input change handler
-        document.getElementById('jdFile').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                document.getElementById('fileName').textContent = '✓ ' + fileName;
-            }
-        });
-
-        // Text form handler
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const jobDescription = document.getElementById('jobDescription').value;
-            const interviewType = document.getElementById('interviewType').value;
-
-            // Show loading, hide result
-            loading.classList.add('active');
-            result.classList.remove('active');
-            submitBtn.disabled = true;
-
-            try {
-                const response = await fetch('/api/generate-interview', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ jobDescription, interviewType }),
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    formatResult(data.questions);
-                    result.classList.add('active');
-                } else {
-                    resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
-                    result.classList.add('active');
-                }
-            } catch (error) {
-                resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                result.classList.add('active');
-            } finally {
-                loading.classList.remove('active');
-                submitBtn.disabled = false;
-            }
-        });
-
-        // File upload form handler
-        document.getElementById('fileUploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = new FormData();
-            formData.append('jdFile', document.getElementById('jdFile').files[0]);
-            formData.append('interviewType', document.getElementById('interviewTypeFile').value);
-
-            loading.classList.add('active');
-            result.classList.remove('active');
-            document.getElementById('uploadBtn').disabled = true;
-
-            try {
-                const response = await fetch('/api/generate-interview-file', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    formatResult(data.questions);
-                    result.classList.add('active');
-                } else {
-                    resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
-                    result.classList.add('active');
-                }
-            } catch (error) {
-                resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                result.classList.add('active');
-            } finally {
-                loading.classList.remove('active');
-                document.getElementById('uploadBtn').disabled = false;
-            }
-        });
 
         // Generate pulsing nodes for Q&A theme
         function createPulsingNodes() {

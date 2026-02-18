@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser JavaScript Test - Aria AI</title>
+    <link rel="stylesheet" href="/components/toast.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1A1A1A;
+            color: #FFFFFF;
+            padding: 40px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { color: #EFA73F; margin-bottom: 30px; }
+        .test-section {
+            background: #2a2a2a;
+            border: 2px solid #3a3a3a;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-title { color: #EFA73F; font-weight: bold; margin-bottom: 15px; font-size: 1.2em; }
+        .test-result { margin-left: 20px; line-height: 1.8; }
+        .pass { color: #22c55e; }
+        .fail { color: #ef4444; }
+        .warning { color: #f59e0b; }
+        button {
+            background: #EFA73F;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 10px 10px 0;
+        }
+        button:hover { background: #d89435; }
+        .file-test { margin-top: 20px; }
+        input[type="file"] {
+            background: #3a3a3a;
+            color: white;
+            padding: 10px;
+            border: 2px solid #EFA73F;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .instructions {
+            background: #2a2a2a;
+            border-left: 4px solid #EFA73F;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .instructions h2 { color: #EFA73F; margin-bottom: 15px; }
+        .instructions ol { margin-left: 30px; line-height: 2; }
+        .instructions li { margin-bottom: 10px; }
+        code {
+            background: #1A1A1A;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #22c55e;
+        }
+    </style>
+    <script src="/components/toast.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Browser JavaScript Diagnostic Test</h1>
+
+        <div class="test-section">
+            <div class="test-title">1. Toast.js Library Test</div>
+            <div class="test-result" id="toastTest">Running tests...</div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">2. Inline onclick Handler Test</div>
+            <div class="test-result">
+                <button onclick="testInlineClick()">Click Me (Inline onclick)</button>
+                <div id="inlineResult" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">3. addEventListener Test</div>
+            <div class="test-result">
+                <button id="eventListenerBtn">Click Me (addEventListener)</button>
+                <div id="eventListenerResult" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">4. File Upload Test</div>
+            <div class="test-result">
+                <div class="file-test">
+                    <input type="file" id="fileInput" onchange="testFileUpload(this)">
+                    <div id="fileResult" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">5. Form Submission Test</div>
+            <div class="test-result">
+                <form id="testForm" onsubmit="testFormSubmit(event)">
+                    <input type="text" placeholder="Type something..." style="padding: 10px; background: #3a3a3a; border: 1px solid #EFA73F; color: white; border-radius: 5px; width: 300px;">
+                    <button type="submit">Submit Form</button>
+                </form>
+                <div id="formResult" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">6. Console Errors Check</div>
+            <div class="test-result" id="consoleTest">
+                Open browser DevTools (F12) and check the Console tab for any red errors.
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h2>⚠️ If Tests Are Failing - Clear Browser Cache:</h2>
+            <ol>
+                <li><strong>Windows/Linux:</strong> Press <code>Ctrl + Shift + Delete</code></li>
+                <li><strong>Mac:</strong> Press <code>Cmd + Shift + Delete</code></li>
+                <li>Select "Cached images and files"</li>
+                <li>Click "Clear data" or "Clear browsing data"</li>
+                <li><strong>OR use Hard Refresh:</strong>
+                    <ul style="margin-left: 20px; margin-top: 5px;">
+                        <li>Windows/Linux: <code>Ctrl + Shift + R</code> or <code>Ctrl + F5</code></li>
+                        <li>Mac: <code>Cmd + Shift + R</code></li>
+                    </ul>
+                </li>
+                <li>Reload this page and test again</li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #2a2a2a; border-radius: 10px;">
+            <h2 style="color: #EFA73F; margin-bottom: 15px;">Quick Actions:</h2>
+            <button onclick="location.reload(true)">🔄 Hard Reload This Page</button>
+            <button onclick="testAllToasts()">🧪 Test All Toast Functions</button>
+            <button onclick="window.location.href='/'">🏠 Go to Home</button>
+            <button onclick="window.location.href='/login.html'">🔐 Go to Login</button>
+        </div>
+    </div>
+
+    <script>
+        // Test toast.js loading
+        function testToastLibrary() {
+            const results = [];
+
+            if (typeof window.toast !== 'undefined') {
+                results.push('<span class="pass">✅ window.toast is defined</span>');
+            } else {
+                results.push('<span class="fail">❌ window.toast is NOT defined</span>');
+            }
+
+            if (typeof window.toastSuccess === 'function') {
+                results.push('<span class="pass">✅ toastSuccess() function exists</span>');
+            } else {
+                results.push('<span class="fail">❌ toastSuccess() function missing</span>');
+            }
+
+            if (typeof window.toastError === 'function') {
+                results.push('<span class="pass">✅ toastError() function exists</span>');
+            } else {
+                results.push('<span class="fail">❌ toastError() function missing</span>');
+            }
+
+            if (typeof window.toastWarning === 'function') {
+                results.push('<span class="pass">✅ toastWarning() function exists</span>');
+            } else {
+                results.push('<span class="fail">❌ toastWarning() function missing</span>');
+            }
+
+            if (typeof window.toastInfo === 'function') {
+                results.push('<span class="pass">✅ toastInfo() function exists</span>');
+            } else {
+                results.push('<span class="fail">❌ toastInfo() function missing</span>');
+            }
+
+            document.getElementById('toastTest').innerHTML = results.join('<br>');
+        }
+
+        // Test inline onclick
+        function testInlineClick() {
+            document.getElementById('inlineResult').innerHTML = '<span class="pass">✅ Inline onclick works!</span>';
+            if (typeof toastSuccess === 'function') {
+                toastSuccess('Success!', 'Inline onclick handler is working');
+            }
+        }
+
+        // Test addEventListener
+        document.getElementById('eventListenerBtn').addEventListener('click', function() {
+            document.getElementById('eventListenerResult').innerHTML = '<span class="pass">✅ addEventListener works!</span>';
+            if (typeof toastInfo === 'function') {
+                toastInfo('Success!', 'addEventListener is working');
+            }
+        });
+
+        // Test file upload
+        function testFileUpload(input) {
+            const fileName = input.files[0]?.name;
+            if (fileName) {
+                document.getElementById('fileResult').innerHTML = '<span class="pass">✅ File upload works! Selected: ' + fileName + '</span>';
+                if (typeof toastSuccess === 'function') {
+                    toastSuccess('File Selected', fileName);
+                }
+            } else {
+                document.getElementById('fileResult').innerHTML = '<span class="fail">❌ No file selected</span>';
+            }
+        }
+
+        // Test form submission
+        function testFormSubmit(event) {
+            event.preventDefault();
+            document.getElementById('formResult').innerHTML = '<span class="pass">✅ Form submission works!</span>';
+            if (typeof toastSuccess === 'function') {
+                toastSuccess('Form Submitted!', 'Form handling is working correctly');
+            }
+        }
+
+        // Test all toast functions
+        function testAllToasts() {
+            if (typeof toastSuccess === 'function') {
+                setTimeout(() => toastSuccess('Success', 'This is a success toast'), 0);
+                setTimeout(() => toastError('Error', 'This is an error toast'), 1000);
+                setTimeout(() => toastWarning('Warning', 'This is a warning toast'), 2000);
+                setTimeout(() => toastInfo('Info', 'This is an info toast'), 3000);
+            } else {
+                alert('Toast functions are not loaded! Please clear your browser cache.');
+            }
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', function() {
+            testToastLibrary();
+
+            // Check for JavaScript errors
+            window.addEventListener('error', function(e) {
+                console.error('JavaScript Error:', e.message);
+                document.getElementById('consoleTest').innerHTML =
+                    '<span class="fail">❌ JavaScript error detected: ' + e.message + '</span>';
+            });
+        });
+    </script>
+</body>
+</html>

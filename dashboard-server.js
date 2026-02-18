@@ -31,6 +31,7 @@ app.use(helmet({
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"], // unsafe-eval needed for Chart.js
+      scriptSrcAttr: ["'unsafe-inline'"], // CRITICAL: Allow inline onclick handlers
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'"]
     }
@@ -263,10 +264,14 @@ app.use(express.static('public'));
 // API endpoint for candidate sourcing with file upload
 app.post('/api/source-candidates-file', upload.single('jdFile'), async (req, res) => {
   try {
-    let jobDescription = '';
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'Please upload a job description file' });
+    }
 
-    if (req.file) {
-      jobDescription = await extractTextFromFile(req.file.path, req.file.mimetype);
+    let jobDescription = await extractTextFromFile(req.file.path, req.file.mimetype);
+
+    if (!jobDescription || jobDescription.trim() === '') {
+      return res.status(400).json({ success: false, error: 'Could not extract text from file' });
     }
 
     const SOURCING_PROMPT = `You are an expert technical recruiter and Boolean search specialist.
@@ -669,12 +674,20 @@ app.post('/api/generate-offer', async (req, res) => {
 });
 
 // API endpoint for candidate comparison with file uploads
-app.post('/api/compare-candidates-files', upload.array('resumes', 3), async (req, res) => {
+app.post('/api/compare-candidates-files', upload.array('resumes', 5), async (req, res) => {
   try {
     const { jd } = req.body;
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, error: 'No files uploaded' });
+    }
+
+    if (req.files.length < 2) {
+      return res.status(400).json({ success: false, error: 'Please upload at least 2 resumes to compare' });
+    }
+
+    if (!jd || jd.trim() === '') {
+      return res.status(400).json({ success: false, error: 'Please provide a job description' });
     }
 
     // Extract text from all uploaded resume files

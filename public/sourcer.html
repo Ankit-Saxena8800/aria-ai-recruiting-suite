@@ -4,236 +4,291 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Sourcer - Aria AI</title>
+    <link rel="stylesheet" href="/components/toast.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1A1A1A;
             min-height: 100vh;
             color: #FFFFFF;
-            padding: 32px;
+            padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
-
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background:
                 radial-gradient(ellipse at top right, rgba(239, 167, 63, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom left, rgba(37, 141, 88, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at center, rgba(186, 93, 7, 0.08) 0%, transparent 70%);
+                radial-gradient(ellipse at bottom left, rgba(37, 141, 88, 0.12) 0%, transparent 50%);
             animation: meshMove 30s ease-in-out infinite;
             z-index: 0;
             pointer-events: none;
         }
-
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -30%;
-            left: -20%;
-            width: 70%;
-            height: 70%;
-            background: radial-gradient(circle, rgba(37, 141, 88, 0.12) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: floatReverse 25s ease-in-out infinite;
-            z-index: 0;
-            pointer-events: none;
-        }
-
         @keyframes meshMove {
             0%, 100% { transform: scale(1) rotate(0deg); }
             50% { transform: scale(1.1) rotate(5deg); }
         }
-
-        @keyframes floatReverse {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(30px, -30px) scale(1.05); }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 48px;
-            animation: fadeInDown 0.6s ease-out;
-        }
-
+        .container { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 40px; }
         .header h1 {
-            font-size: 3em;
-            margin-bottom: 12px;
-            background: linear-gradient(
-                135deg,
-                #EFA73F 0%,
-                #f4c15d 25%,
-                #EFA73F 50%,
-                #258D58 75%,
-                #2ea76a 100%
-            );
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #EFA73F 0%, #f4c15d 25%, #EFA73F 50%, #258D58 75%, #2ea76a 100%);
             background-size: 200% auto;
             -webkit-background-clip: text;
-            background-clip: text;
-            font-weight: 800;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+            font-weight: 800;
             animation: gradientShift 8s ease infinite;
         }
-
         @keyframes gradientShift {
             0%, 100% { background-position: 0% center; }
             50% { background-position: 100% center; }
         }
-
-        .header p {
-            color: #b8c1ec;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
         .back-btn {
             background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.95em;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.2);
-            animation: fadeIn 0.4s ease-out;
+            gap: 8px;
+            margin-bottom: 20px;
         }
-
-        .back-btn:hover {
-            transform: translateX(-5px) translateY(-2px);
-            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.4);
-        }
+        .back-btn:hover { transform: translateX(-5px); box-shadow: 0 5px 15px rgba(239, 167, 63, 0.4); }
 
         .card {
             background: linear-gradient(135deg, #313131 0%, #464646 100%);
-            backdrop-filter: blur(30px);
             border: 1px solid rgba(239, 167, 63, 0.15);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 32px;
-            box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            animation: fadeInUp 0.6s ease-out;
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .card:hover {
-            border-color: rgba(239, 167, 63, 0.3);
-            box-shadow:
-                0 12px 48px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        /* Mode Indicator */
+        .mode-indicator {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        .mode-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+            opacity: 0.5;
+        }
+        .mode-badge.active {
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(239, 167, 63, 0.3);
+        }
+        .mode-badge.manual { background: #EFA73F; color: white; }
+        .mode-badge.file { background: #258D58; color: white; }
+
+        /* Drag & Drop File Upload */
+        .file-upload-zone {
+            border: 3px dashed rgba(239, 167, 63, 0.4);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+            background: rgba(239, 167, 63, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .file-upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(239, 167, 63, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .file-upload-zone:hover::before { opacity: 1; }
+        .file-upload-zone:hover {
+            border-color: #EFA73F;
+            background: rgba(239, 167, 63, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.2);
+        }
+        .file-upload-zone.drag-over {
+            border-color: #258D58;
+            background: rgba(37, 141, 88, 0.15);
+            border-style: solid;
+        }
+        .file-upload-zone.has-file {
+            border-color: #258D58;
+            border-style: solid;
+            background: linear-gradient(135deg, rgba(37, 141, 88, 0.1) 0%, rgba(37, 141, 88, 0.05) 100%);
+        }
+        .file-upload-zone input[type="file"] { display: none; }
+        .upload-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+        .file-upload-zone:hover .upload-icon { transform: scale(1.1) translateY(-5px); }
+        .upload-text {
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+        .upload-hint {
+            color: #a8b2d1;
+            font-size: 0.9em;
+        }
+        .file-name {
+            margin-top: 15px;
+            color: #258D58;
+            font-weight: 600;
+            display: none;
+        }
+        .file-name.show { display: block; }
+        .remove-file {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid #dc2626;
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        .remove-file:hover {
+            background: #dc2626;
+            color: white;
         }
 
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 40px 0;
+            opacity: 0.7;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(239, 167, 63, 0.3), transparent);
+        }
+        .divider span {
+            padding: 0 20px;
+            color: #a8b2d1;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Fields */
         label {
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: #EFA73F;
             font-weight: 600;
             font-size: 1.1em;
-            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
+        .field-badge {
+            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(239, 167, 63, 0.2);
+            color: #EFA73F;
+            transition: all 0.3s;
+        }
+        .field-badge.optional {
+            background: rgba(168, 178, 209, 0.2);
+            color: #a8b2d1;
+        }
         input, textarea {
             width: 100%;
-            padding: 18px 20px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.04);
-            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
             font-size: 1em;
             font-family: inherit;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            transition: all 0.3s;
         }
-
-        textarea {
-            min-height: 220px;
-            resize: vertical;
-            line-height: 1.6;
-        }
-
         input:focus, textarea:focus {
             outline: none;
             border-color: #EFA73F;
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow:
-                0 0 0 4px rgba(239, 167, 63, 0.15),
-                0 0 20px rgba(239, 167, 63, 0.2),
-                0 8px 24px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 4px rgba(239, 167, 63, 0.15);
         }
+        input:disabled, textarea:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        textarea { min-height: 100px; resize: vertical; }
 
-        input::placeholder, textarea::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+        /* Manual fields state when file is uploaded */
+        .manual-fields.faded {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .manual-fields.faded input,
+        .manual-fields.faded textarea {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .btn {
             background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
+            color: #FFFFFF;
             padding: 18px 48px;
             border: none;
-            border-radius: 32px;
+            border-radius: 25px;
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 24px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.3);
+            margin-top: 20px;
+            transition: all 0.3s;
+            width: 100%;
             position: relative;
             overflow: hidden;
         }
-
         .btn::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.3);
             transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
-
         .btn:hover::before {
             width: 300px;
             height: 300px;
         }
-
         .btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 16px 40px rgba(239, 167, 63, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(239, 167, 63, 0.4);
         }
-
-        .btn:active {
-            transform: translateY(-1px) scale(0.98);
-        }
-
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -243,25 +298,30 @@
         .loading {
             display: none;
             text-align: center;
-            padding: 48px;
+            padding: 40px;
             color: #EFA73F;
             font-size: 1.2em;
         }
-
-        .loading.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
+        .loading.active { display: block; }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #EFA73F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .result {
             display: none;
-            margin-top: 40px;
+            margin-top: 30px;
         }
-
-        .result.active {
-            display: block;
-            animation: fadeInUp 0.6s ease-out;
-        }
+        .result.active { display: block; }
 
         .result-header {
             display: flex;
@@ -420,132 +480,6 @@
             word-break: break-word;
         }
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #EFA73F;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            color: #a8b2d1;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(239, 167, 63, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .file-upload-area {
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px dashed rgba(239, 167, 63, 0.4);
-            border-radius: 16px;
-            padding: 48px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 24px;
-        }
-
-        .file-upload-area:hover {
-            border-color: #EFA73F;
-            background: rgba(239, 167, 63, 0.08);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(239, 167, 63, 0.2);
-        }
-
-        .file-upload-area input[type="file"] {
-            display: none;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            background: linear-gradient(135deg, #258D58 0%, #2dd46d 100%);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(37, 141, 88, 0.4);
-            font-weight: 600;
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(100px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
         /* Network Animation - Talent Connections */
         .network-node {
             position: fixed;
@@ -578,6 +512,7 @@
             50% { opacity: 0.8; }
             100% { transform: scaleX(1); opacity: 0; }
         }
+
         /* Floating Particles */
         .particle {
             position: fixed;
@@ -597,63 +532,73 @@
             100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
         }
     </style>
+    <script src="/components/toast.js"></script>
 </head>
 <body>
     <div class="container">
         <a href="/" class="back-btn">← Back to Home</a>
-
         <div class="header">
             <h1>Candidate Sourcer</h1>
             <p style="color: #a8b2d1;">Generate Boolean searches, LinkedIn X-rays, and sourcing strategies</p>
         </div>
 
         <div class="card">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('text')">Paste Text</div>
-                <div class="tab" onclick="switchTab('file')">Upload JD File</div>
+            <!-- Mode Indicator -->
+            <div class="mode-indicator">
+                <div class="mode-badge manual active" id="manualBadge">
+                    ✍️ Manual Input
+                </div>
+                <div class="mode-badge file" id="fileBadge">
+                    📄 File Mode
+                </div>
             </div>
 
-            <!-- Text Input Tab -->
-            <div id="textTab" class="tab-content active">
-                <form id="sourcerForm">
-                    <label for="jobDescription">Job Description or Role Requirements:</label>
-                    <textarea
-                        id="jobDescription"
-                        name="jobDescription"
-                        placeholder="Paste your job description here, or describe the role you're hiring for...
+            <form id="sourcerForm">
+                <!-- Drag & Drop File Upload Zone -->
+                <div class="file-upload-zone" id="fileZone">
+                    <input type="file" id="fileInput" name="jdFile" accept=".pdf,.doc,.docx,.txt">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Upload JD File for Sourcing</div>
+                    <div class="upload-hint">Click to browse or drag & drop • PDF, DOC, DOCX, TXT (Max 10MB)</div>
+                    <div class="file-name" id="fileName"></div>
+                </div>
 
-Example:
-Senior Backend Engineer
-Location: Noida/Remote
-Experience: 4-6 years
-Skills: Python, Django, AWS, PostgreSQL, Microservices
-Domain: OTT/Video Streaming preferred"
-                        required
-                    ></textarea>
+                <!-- Divider -->
+                <div class="divider">
+                    <span>Or enter details manually</span>
+                </div>
 
-                    <button type="submit" class="btn" id="submitBtn">Generate Sourcing Strategy</button>
-                </form>
-            </div>
+                <!-- Manual Input Fields -->
+                <div class="manual-fields" id="manualFields">
+                    <label for="jobTitle">
+                        Job Title
+                        <span class="field-badge" id="titleBadge">required</span>
+                    </label>
+                    <input type="text" id="jobTitle" placeholder="e.g., Senior Backend Engineer">
 
-            <!-- File Upload Tab -->
-            <div id="fileTab" class="tab-content">
-                <form id="fileUploadForm" enctype="multipart/form-data">
-                    <label>Upload JD File:</label>
-                    <div class="file-upload-area" onclick="document.getElementById('jdFile').click()">
-                        <input type="file" id="jdFile" name="jdFile" accept=".pdf,.doc,.docx,.txt" required>
-                        <div style="font-size: 3em; margin-bottom: 15px;">+</div>
-                        <div style="color: #EFA73F; font-weight: 600; font-size: 1.1em; margin-bottom: 10px;">
-                            Click to upload or drag & drop
-                        </div>
-                        <div style="color: #a8b2d1; font-size: 0.9em;">
-                            Supports PDF, DOC, DOCX, TXT (Max 10MB)
-                        </div>
-                        <div id="fileName" style="margin-top: 15px; color: #258D58; font-weight: 600;"></div>
-                    </div>
+                    <label for="experience">
+                        Experience Required
+                        <span class="field-badge" id="expBadge">required</span>
+                    </label>
+                    <input type="text" id="experience" placeholder="e.g., 4-6 years">
 
-                    <button type="submit" class="btn" id="uploadBtn">Generate from Uploaded File</button>
-                </form>
-            </div>
+                    <label for="skills">
+                        Key Skills (comma-separated)
+                        <span class="field-badge" id="skillsBadge">required</span>
+                    </label>
+                    <textarea id="skills" placeholder="e.g., Python, Django, AWS, PostgreSQL, Microservices"></textarea>
+
+                    <label for="location">
+                        Location
+                        <span class="field-badge" id="locBadge">required</span>
+                    </label>
+                    <input type="text" id="location" placeholder="e.g., Noida / Remote">
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="btnText">Generate Sourcing Strategy</span>
+                </button>
+            </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -667,27 +612,108 @@ Domain: OTT/Video Streaming preferred"
                 </div>
                 <div id="resultText" class="formatted-result"></div>
             </div>
-
-            <div class="toast" id="copyToast">Copied to clipboard!</div>
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('sourcerForm');
+        const fileZone = document.getElementById('fileZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const manualFields = document.getElementById('manualFields');
         const submitBtn = document.getElementById('submitBtn');
-        const loading = document.getElementById('loading');
-        const result = document.getElementById('result');
-        const resultText = document.getElementById('resultText');
+        const btnText = document.getElementById('btnText');
+        const form = document.getElementById('sourcerForm');
 
-        // Show toast notification
-        function showToast(message) {
-            const toast = document.getElementById('copyToast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
+        const manualBadge = document.getElementById('manualBadge');
+        const fileBadge = document.getElementById('fileBadge');
+
+        const titleBadge = document.getElementById('titleBadge');
+        const expBadge = document.getElementById('expBadge');
+        const skillsBadge = document.getElementById('skillsBadge');
+        const locBadge = document.getElementById('locBadge');
+
+        let hasFile = false;
+
+        // Update mode indicator
+        function updateMode(isFile) {
+            hasFile = isFile;
+            if (isFile) {
+                manualBadge.classList.remove('active');
+                fileBadge.classList.add('active');
+                manualFields.classList.add('faded');
+                btnText.textContent = 'Generate from Uploaded JD';
+
+                // Make manual fields optional
+                titleBadge.textContent = 'optional';
+                titleBadge.classList.add('optional');
+                expBadge.textContent = 'optional';
+                expBadge.classList.add('optional');
+                skillsBadge.textContent = 'optional';
+                skillsBadge.classList.add('optional');
+                locBadge.textContent = 'optional';
+                locBadge.classList.add('optional');
+            } else {
+                manualBadge.classList.add('active');
+                fileBadge.classList.remove('active');
+                manualFields.classList.remove('faded');
+                btnText.textContent = 'Generate Sourcing Strategy';
+
+                // Make manual fields required
+                titleBadge.textContent = 'required';
+                titleBadge.classList.remove('optional');
+                expBadge.textContent = 'required';
+                expBadge.classList.remove('optional');
+                skillsBadge.textContent = 'required';
+                skillsBadge.classList.remove('optional');
+                locBadge.textContent = 'required';
+                locBadge.classList.remove('optional');
+            }
         }
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.innerHTML = `✓ ${file.name} <button type="button" class="remove-file" onclick="removeFile()">Remove</button>`;
+                fileName.classList.add('show');
+                fileZone.classList.add('has-file');
+                updateMode(true);
+            }
+        });
+
+        // Remove file
+        window.removeFile = function() {
+            fileInput.value = '';
+            fileName.classList.remove('show');
+            fileName.innerHTML = '';
+            fileZone.classList.remove('has-file');
+            updateMode(false);
+        };
+
+        // Drag and drop
+        fileZone.addEventListener('click', () => fileInput.click());
+
+        fileZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileZone.classList.add('drag-over');
+        });
+
+        fileZone.addEventListener('dragleave', () => {
+            fileZone.classList.remove('drag-over');
+        });
+
+        fileZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.innerHTML = `✓ ${file.name} <button type="button" class="remove-file" onclick="removeFile()">Remove</button>`;
+                fileName.classList.add('show');
+                fileZone.classList.add('has-file');
+                updateMode(true);
+            }
+        });
 
         // Copy to clipboard function
         async function copyToClipboard(text, button) {
@@ -696,7 +722,9 @@ Domain: OTT/Video Streaming preferred"
                 const originalText = button.innerHTML;
                 button.innerHTML = '<span style="font-size: 1em;">✓</span> Copied!';
                 button.classList.add('copied');
-                showToast('Copied to clipboard!');
+                if (typeof toastSuccess === 'function') {
+                    toastSuccess('Copied!', 'Content copied to clipboard');
+                }
 
                 setTimeout(() => {
                     button.innerHTML = originalText;
@@ -704,12 +732,15 @@ Domain: OTT/Video Streaming preferred"
                 }, 2000);
             } catch (err) {
                 console.error('Failed to copy:', err);
-                showToast('Failed to copy');
+                if (typeof toastError === 'function') {
+                    toastError('Copy Failed', 'Failed to copy to clipboard');
+                }
             }
         }
 
         // Format the AI response into beautiful HTML
         function formatResult(text) {
+            const resultText = document.getElementById('resultText');
             resultText.innerHTML = '';
 
             // Only split on major section headers (### headings), not on every line
@@ -807,104 +838,86 @@ Domain: OTT/Video Streaming preferred"
                 .replace(/\n/g, '<br>');
         }
 
-        // Tab switching
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-
-            if (tab === 'text') {
-                tabs[0].classList.add('active');
-                document.getElementById('textTab').classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('fileTab').classList.add('active');
-            }
-        }
-
-        // File input change handler
-        document.getElementById('jdFile').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                document.getElementById('fileName').textContent = '✓ ' + fileName;
-            }
-        });
-
-        // Text form handler
+        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const jobDescription = document.getElementById('jobDescription').value;
+            // Validation
+            if (!hasFile) {
+                // Manual input - check required fields
+                if (!document.getElementById('jobTitle').value ||
+                    !document.getElementById('experience').value ||
+                    !document.getElementById('skills').value ||
+                    !document.getElementById('location').value) {
+                    if (typeof toastError === 'function') {
+                        toastError('Missing Fields', 'Please fill in all required fields or upload a file');
+                    } else {
+                        alert('Please fill in all required fields or upload a file');
+                    }
+                    return;
+                }
+            }
 
-            // Show loading, hide result
-            loading.classList.add('active');
-            result.classList.remove('active');
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').classList.remove('active');
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch('/api/source-candidates', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ jobDescription }),
-                });
+                let response, data;
 
-                const data = await response.json();
+                if (hasFile) {
+                    // File upload mode
+                    const formData = new FormData();
+                    formData.append('jdFile', fileInput.files[0]);
+
+                    response = await fetch('/api/source-candidates-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    data = await response.json();
+                } else {
+                    // Manual input mode
+                    const jobDescription = `${document.getElementById('jobTitle').value}
+Location: ${document.getElementById('location').value}
+Experience: ${document.getElementById('experience').value}
+Skills: ${document.getElementById('skills').value}`;
+
+                    response = await fetch('/api/source-candidates', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ jobDescription })
+                    });
+                    data = await response.json();
+                }
 
                 if (data.success) {
                     formatResult(data.strategy);
-                    result.classList.add('active');
+                    document.getElementById('result').classList.add('active');
+                    if (typeof toastSuccess === 'function') {
+                        toastSuccess('Strategy Generated!', 'Your sourcing strategy has been created successfully');
+                    }
                 } else {
+                    const resultText = document.getElementById('resultText');
                     resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
-                    result.classList.add('active');
+                    document.getElementById('result').classList.add('active');
+                    if (typeof toastError === 'function') {
+                        toastError('Generation Failed', data.error || 'Failed to generate sourcing strategy');
+                    }
                 }
             } catch (error) {
+                const resultText = document.getElementById('resultText');
                 resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                result.classList.add('active');
+                document.getElementById('result').classList.add('active');
+                if (typeof toastError === 'function') {
+                    toastError('Error', error.message || 'An error occurred');
+                }
             } finally {
-                loading.classList.remove('active');
+                document.getElementById('loading').classList.remove('active');
                 submitBtn.disabled = false;
             }
         });
 
-        // File upload form handler
-        document.getElementById('fileUploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = new FormData();
-            formData.append('jdFile', document.getElementById('jdFile').files[0]);
-
-            loading.classList.add('active');
-            result.classList.remove('active');
-            document.getElementById('uploadBtn').disabled = true;
-
-            try {
-                const response = await fetch('/api/source-candidates-file', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    formatResult(data.strategy);
-                    result.classList.add('active');
-                } else {
-                    resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
-                    result.classList.add('active');
-                }
-            } catch (error) {
-                resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                result.classList.add('active');
-            } finally {
-                loading.classList.remove('active');
-                document.getElementById('uploadBtn').disabled = false;
-            }
-        });
-        
+        // Network Animation
         function createNetworkAnimation() {
             const container = document.body;
             const nodeCount = 10;
@@ -939,7 +952,8 @@ Domain: OTT/Video Streaming preferred"
             }
         }
         createNetworkAnimation();
-        
+
+        // Floating Particles
         function createParticles() {
             const container = document.body;
             const particleCount = 20;

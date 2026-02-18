@@ -6,233 +6,289 @@
     <title>Resume Screener - Aria AI</title>
     <link rel="stylesheet" href="/components/toast.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #1A1A1A;
             min-height: 100vh;
             color: #FFFFFF;
-            padding: 32px;
+            padding: 20px;
             position: relative;
             overflow-x: hidden;
         }
-
         body::before {
             content: '';
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             background:
                 radial-gradient(ellipse at top right, rgba(239, 167, 63, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at bottom left, rgba(37, 141, 88, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at center, rgba(186, 93, 7, 0.08) 0%, transparent 70%);
+                radial-gradient(ellipse at bottom left, rgba(37, 141, 88, 0.12) 0%, transparent 50%);
             animation: meshMove 30s ease-in-out infinite;
             z-index: 0;
             pointer-events: none;
         }
-
-        body::after {
-            content: '';
-            position: fixed;
-            bottom: -30%;
-            left: -20%;
-            width: 70%;
-            height: 70%;
-            background: radial-gradient(circle, rgba(37, 141, 88, 0.12) 0%, transparent 70%);
-            border-radius: 50%;
-            animation: floatReverse 25s ease-in-out infinite;
-            z-index: 0;
-            pointer-events: none;
-        }
-
         @keyframes meshMove {
             0%, 100% { transform: scale(1) rotate(0deg); }
             50% { transform: scale(1.1) rotate(5deg); }
         }
-
-
-        @keyframes floatReverse {
-            0%, 100% { transform: translate(0, 0) scale(1); }
-            50% { transform: translate(30px, -30px) scale(1.05); }
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 48px;
-            animation: fadeInDown 0.6s ease-out;
-        }
-
+        .container { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 40px; }
         .header h1 {
-            font-size: 3em;
-            margin-bottom: 12px;
-            background: linear-gradient(
-                135deg,
-                #EFA73F 0%,
-                #f4c15d 25%,
-                #EFA73F 50%,
-                #258D58 75%,
-                #2ea76a 100%
-            );
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #EFA73F 0%, #f4c15d 25%, #EFA73F 50%, #258D58 75%, #2ea76a 100%);
             background-size: 200% auto;
             -webkit-background-clip: text;
-            background-clip: text;
-            font-weight: 800;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+            font-weight: 800;
             animation: gradientShift 8s ease infinite;
         }
-
         @keyframes gradientShift {
             0%, 100% { background-position: 0% center; }
             50% { background-position: 100% center; }
         }
-
-        .header p {
-            color: #b8c1ec;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
         .back-btn {
             background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 12px;
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            font-size: 0.95em;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.2);
-            animation: fadeIn 0.4s ease-out;
+            gap: 8px;
+            margin-bottom: 20px;
         }
-
-        .back-btn:hover {
-            transform: translateX(-5px) translateY(-2px);
-            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.4);
-        }
+        .back-btn:hover { transform: translateX(-5px); box-shadow: 0 5px 15px rgba(239, 167, 63, 0.4); }
 
         .card {
             background: linear-gradient(135deg, #313131 0%, #464646 100%);
-            backdrop-filter: blur(30px);
             border: 1px solid rgba(239, 167, 63, 0.15);
-            border-radius: 24px;
-            padding: 48px;
-            margin-bottom: 32px;
-            box-shadow:
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            animation: fadeInUp 0.6s ease-out;
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .card:hover {
-            border-color: rgba(239, 167, 63, 0.3);
-            box-shadow:
-                0 12px 48px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        /* Mode Indicator */
+        .mode-indicator {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            align-items: center;
+            justify-content: center;
+        }
+        .mode-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s;
+            opacity: 0.5;
+        }
+        .mode-badge.active {
+            opacity: 1;
+            box-shadow: 0 4px 12px rgba(239, 167, 63, 0.3);
+        }
+        .mode-badge.manual { background: #EFA73F; color: white; }
+        .mode-badge.file { background: #258D58; color: white; }
+
+        /* Drag & Drop File Upload */
+        .file-upload-zone {
+            border: 3px dashed rgba(239, 167, 63, 0.4);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+            background: rgba(239, 167, 63, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        .file-upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            right: 0; bottom: 0;
+            background: radial-gradient(circle at center, rgba(239, 167, 63, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .file-upload-zone:hover::before { opacity: 1; }
+        .file-upload-zone:hover {
+            border-color: #EFA73F;
+            background: rgba(239, 167, 63, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.2);
+        }
+        .file-upload-zone.drag-over {
+            border-color: #258D58;
+            background: rgba(37, 141, 88, 0.15);
+            border-style: solid;
+        }
+        .file-upload-zone.has-file {
+            border-color: #258D58;
+            border-style: solid;
+            background: linear-gradient(135deg, rgba(37, 141, 88, 0.1) 0%, rgba(37, 141, 88, 0.05) 100%);
+        }
+        .file-upload-zone input[type="file"] { display: none; }
+        .upload-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+        .file-upload-zone:hover .upload-icon { transform: scale(1.1) translateY(-5px); }
+        .upload-text {
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.2em;
+            margin-bottom: 8px;
+        }
+        .upload-hint {
+            color: #a8b2d1;
+            font-size: 0.9em;
+        }
+        .file-name {
+            margin-top: 15px;
+            color: #258D58;
+            font-weight: 600;
+            display: none;
+        }
+        .file-name.show { display: block; }
+        .remove-file {
+            background: rgba(220, 38, 38, 0.2);
+            border: 1px solid #dc2626;
+            color: #ef4444;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-left: 10px;
+            transition: all 0.3s;
+        }
+        .remove-file:hover {
+            background: #dc2626;
+            color: white;
         }
 
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 40px 0;
+            opacity: 0.7;
+        }
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(239, 167, 63, 0.3), transparent);
+        }
+        .divider span {
+            padding: 0 20px;
+            color: #a8b2d1;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Form Fields */
         label {
             display: block;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: #EFA73F;
             font-weight: 600;
             font-size: 1.1em;
-            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        textarea {
+        .field-badge {
+            font-size: 0.7em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(239, 167, 63, 0.2);
+            color: #EFA73F;
+            transition: all 0.3s;
+        }
+        .field-badge.optional {
+            background: rgba(168, 178, 209, 0.2);
+            color: #a8b2d1;
+        }
+        input, textarea {
             width: 100%;
-            padding: 18px 20px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            background: rgba(255, 255, 255, 0.04);
-            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
             font-size: 1em;
             font-family: inherit;
-            margin-bottom: 24px;
-            transition: all 0.3s ease;
-            min-height: 150px;
-            resize: vertical;
-            line-height: 1.6;
+            margin-bottom: 20px;
+            transition: all 0.3s;
         }
-
-        textarea:focus {
+        input:focus, textarea:focus {
             outline: none;
             border-color: #EFA73F;
-            background: rgba(255, 255, 255, 0.06);
-            box-shadow:
-                0 0 0 4px rgba(239, 167, 63, 0.15),
-                0 0 20px rgba(239, 167, 63, 0.2),
-                0 8px 24px rgba(0, 0, 0, 0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 4px rgba(239, 167, 63, 0.15);
         }
+        input:disabled, textarea:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        textarea { min-height: 120px; resize: vertical; }
 
-        textarea::placeholder {
-            color: rgba(255, 255, 255, 0.4);
+        /* Manual fields state when file is uploaded */
+        .manual-fields.faded {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .manual-fields.faded input,
+        .manual-fields.faded textarea {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .btn {
             background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
+            color: #FFFFFF;
             padding: 18px 48px;
             border: none;
-            border-radius: 32px;
+            border-radius: 25px;
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 24px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 8px 24px rgba(239, 167, 63, 0.3);
+            margin-top: 20px;
+            transition: all 0.3s;
+            width: 100%;
             position: relative;
             overflow: hidden;
         }
-
         .btn::before {
             content: '';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.3);
             transform: translate(-50%, -50%);
             transition: width 0.6s, height 0.6s;
         }
-
         .btn:hover::before {
             width: 300px;
             height: 300px;
         }
-
         .btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 16px 40px rgba(239, 167, 63, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(239, 167, 63, 0.4);
         }
-
-        .btn:active {
-            transform: translateY(-1px) scale(0.98);
-        }
-
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -242,14 +298,23 @@
         .loading {
             display: none;
             text-align: center;
-            padding: 48px;
+            padding: 40px;
             color: #EFA73F;
             font-size: 1.2em;
         }
-
-        .loading.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
+        .loading.active { display: block; }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #EFA73F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .result {
@@ -397,26 +462,6 @@
             box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
         }
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #EFA73F;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -426,101 +471,6 @@
                 opacity: 1;
                 transform: translateY(0);
             }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            color: #a8b2d1;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(239, 167, 63, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: white;
-            border-color: transparent;
-            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .file-upload-area {
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px dashed rgba(239, 167, 63, 0.4);
-            border-radius: 16px;
-            padding: 48px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 24px;
-        }
-
-        .file-upload-area:hover {
-            border-color: #EFA73F;
-            background: rgba(239, 167, 63, 0.08);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(239, 167, 63, 0.2);
-        }
-
-        .file-upload-area input[type="file"] {
-            display: none;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 32px;
-            right: 32px;
-            background: linear-gradient(135deg, #258D58 0%, #2dd46d 100%);
-            color: white;
-            padding: 16px 24px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(37, 141, 88, 0.4);
-            font-weight: 600;
-            z-index: 1000;
-            opacity: 0;
-            transform: translateY(100px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         /* Scanning Line Effect - Resume Screening Theme */
@@ -554,31 +504,6 @@
             }
             90% { opacity: 0.3; }
         }
-
-        /* Floating Particles */
-        .particle {
-            position: fixed;
-            width: 3px;
-            height: 3px;
-            background: #EFA735;
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0.3;
-            z-index: 0;
-        }
-
-        @keyframes floatParticle {
-            0% {
-                transform: translateY(100vh) translateX(0);
-                opacity: 0;
-            }
-            10% { opacity: 0.3; }
-            90% { opacity: 0.3; }
-            100% {
-                transform: translateY(-100px) translateX(50px);
-                opacity: 0;
-            }
-        }
     </style>
     <script src="/components/toast.js"></script>
 </head>
@@ -586,80 +511,64 @@
     <!-- Scanning Line - Resume Screening Effect -->
     <div class="scan-line"></div>
 
-    <!-- Floating Particles -->
-    <div id="particles"></div>
-
     <div class="container">
         <a href="/" class="back-btn">← Back to Home</a>
-
         <div class="header">
             <h1>Resume Screener</h1>
-            <p>AI-powered resume analysis with scoring and recommendations</p>
+            <p style="color: #a8b2d1;">AI-powered resume analysis with scoring and recommendations</p>
         </div>
 
         <div class="card">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('text')">Paste Text</div>
-                <div class="tab" onclick="switchTab('file')">Upload File</div>
+            <!-- Mode Indicator -->
+            <div class="mode-indicator">
+                <div class="mode-badge manual active" id="manualBadge">
+                    ✍️ Manual Input
+                </div>
+                <div class="mode-badge file" id="fileBadge">
+                    📄 File Mode
+                </div>
             </div>
 
-            <!-- Text Input Tab -->
-            <div id="textTab" class="tab-content active">
-                <form id="screenerForm">
-                    <label for="jobDescription">Job Description:</label>
-                    <textarea
-                        id="jobDescription"
-                        name="jobDescription"
-                        placeholder="Paste the job description or role requirements..."
-                        required
-                    ></textarea>
+            <form id="screenerForm">
+                <!-- Drag & Drop File Upload Zone -->
+                <div class="file-upload-zone" id="fileZone">
+                    <input type="file" id="fileInput" name="resume" accept=".pdf,.doc,.docx,.txt">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-text">Upload Resume File</div>
+                    <div class="upload-hint">Click to browse or drag & drop • PDF, DOC, DOCX, TXT (Max 10MB)</div>
+                    <div class="file-name" id="fileName"></div>
+                </div>
 
-                    <label for="resumeText">Resume or Candidate Profile:</label>
-                    <textarea
-                        id="resumeText"
-                        name="resumeText"
-                        placeholder="Paste the candidate's resume text here...
+                <!-- Divider -->
+                <div class="divider">
+                    <span>Or enter details manually</span>
+                </div>
+
+                <!-- Manual Input Fields -->
+                <div class="manual-fields" id="manualFields">
+                    <label for="jobDescription">
+                        Job Description
+                        <span class="field-badge" id="jdBadge">required</span>
+                    </label>
+                    <textarea id="jobDescription" placeholder="Paste the job description or role requirements..."></textarea>
+
+                    <label for="resumeText">
+                        Resume or Candidate Profile
+                        <span class="field-badge" id="resumeBadge">required</span>
+                    </label>
+                    <textarea id="resumeText" placeholder="Paste the candidate's resume text here...
 
 You can copy-paste from:
-- PDF resumes (select all text and copy)
-- LinkedIn profiles
-- Naukri profiles
-- Plain text resumes"
-                        required
-                        style="min-height: 250px;"
-                    ></textarea>
+• PDF resumes (select all text and copy)
+• LinkedIn profiles
+• Naukri profiles
+• Plain text resumes" style="min-height: 200px;"></textarea>
+                </div>
 
-                    <button type="submit" class="btn" id="submitBtn">Analyze Resume</button>
-                </form>
-            </div>
-
-            <!-- File Upload Tab -->
-            <div id="fileTab" class="tab-content">
-                <form id="fileUploadForm" enctype="multipart/form-data">
-                    <label for="jobDescriptionFile">Job Description:</label>
-                    <textarea
-                        id="jobDescriptionFile"
-                        name="jobDescription"
-                        placeholder="Paste the job description..."
-                        required
-                    ></textarea>
-
-                    <label>Upload Resume File:</label>
-                    <div class="file-upload-area" onclick="document.getElementById('resumeFile').click()">
-                        <input type="file" id="resumeFile" name="resume" accept=".pdf,.doc,.docx,.txt" required>
-                        <div style="font-size: 3em; margin-bottom: 15px;">+</div>
-                        <div style="color: #EFA73F; font-weight: 600; font-size: 1.1em; margin-bottom: 10px;">
-                            Click to upload or drag & drop
-                        </div>
-                        <div style="color: #a8b2d1; font-size: 0.9em;">
-                            Supports PDF, DOC, DOCX, TXT (Max 10MB)
-                        </div>
-                        <div id="fileName" style="margin-top: 15px; color: #258D58; font-weight: 600;"></div>
-                    </div>
-
-                    <button type="submit" class="btn" id="uploadBtn">Analyze Uploaded Resume</button>
-                </form>
-            </div>
+                <button type="submit" class="btn" id="submitBtn">
+                    <span id="btnText">Analyze Resume</span>
+                </button>
+            </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -673,27 +582,100 @@ You can copy-paste from:
                 </div>
                 <div id="resultText" class="formatted-result"></div>
             </div>
-
-            <div class="toast" id="copyToast">Copied to clipboard!</div>
         </div>
     </div>
 
     <script>
-        const form = document.getElementById('screenerForm');
+        const fileZone = document.getElementById('fileZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const manualFields = document.getElementById('manualFields');
         const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const form = document.getElementById('screenerForm');
         const loading = document.getElementById('loading');
         const result = document.getElementById('result');
         const resultText = document.getElementById('resultText');
 
-        // Show toast notification
-        function showToast(message) {
-            const toast = document.getElementById('copyToast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2000);
+        const manualBadge = document.getElementById('manualBadge');
+        const fileBadge = document.getElementById('fileBadge');
+        const jdBadge = document.getElementById('jdBadge');
+        const resumeBadge = document.getElementById('resumeBadge');
+
+        let hasFile = false;
+
+        // Update mode indicator
+        function updateMode(isFile) {
+            hasFile = isFile;
+            if (isFile) {
+                manualBadge.classList.remove('active');
+                fileBadge.classList.add('active');
+                manualFields.classList.add('faded');
+                btnText.textContent = 'Analyze Uploaded Resume';
+
+                // Make manual fields optional
+                jdBadge.textContent = 'required';
+                jdBadge.classList.remove('optional');
+                resumeBadge.textContent = 'optional';
+                resumeBadge.classList.add('optional');
+            } else {
+                manualBadge.classList.add('active');
+                fileBadge.classList.remove('active');
+                manualFields.classList.remove('faded');
+                btnText.textContent = 'Analyze Resume';
+
+                // Make manual fields required
+                jdBadge.textContent = 'required';
+                jdBadge.classList.remove('optional');
+                resumeBadge.textContent = 'required';
+                resumeBadge.classList.remove('optional');
+            }
         }
+
+        // File input change
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.innerHTML = `✓ ${file.name} <button type="button" class="remove-file" onclick="removeFile()">Remove</button>`;
+                fileName.classList.add('show');
+                fileZone.classList.add('has-file');
+                updateMode(true);
+            }
+        });
+
+        // Remove file
+        window.removeFile = function() {
+            fileInput.value = '';
+            fileName.classList.remove('show');
+            fileName.innerHTML = '';
+            fileZone.classList.remove('has-file');
+            updateMode(false);
+        };
+
+        // Drag and drop
+        fileZone.addEventListener('click', () => fileInput.click());
+
+        fileZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileZone.classList.add('drag-over');
+        });
+
+        fileZone.addEventListener('dragleave', () => {
+            fileZone.classList.remove('drag-over');
+        });
+
+        fileZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileZone.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                fileInput.files = e.dataTransfer.files;
+                fileName.innerHTML = `✓ ${file.name} <button type="button" class="remove-file" onclick="removeFile()">Remove</button>`;
+                fileName.classList.add('show');
+                fileZone.classList.add('has-file');
+                updateMode(true);
+            }
+        });
 
         // Copy to clipboard function
         async function copyToClipboard(text, button) {
@@ -702,7 +684,6 @@ You can copy-paste from:
                 const originalText = button.innerHTML;
                 button.innerHTML = '<span style="font-size: 1em;">✓</span> Copied!';
                 button.classList.add('copied');
-                showToast('Copied to clipboard!');
 
                 setTimeout(() => {
                     button.innerHTML = originalText;
@@ -710,7 +691,6 @@ You can copy-paste from:
                 }, 2000);
             } catch (err) {
                 console.error('Failed to copy:', err);
-                showToast('Failed to copy');
             }
         }
 
@@ -718,10 +698,10 @@ You can copy-paste from:
         function formatResult(text) {
             resultText.innerHTML = '';
 
-            // Only split on major section headers (### headings), not on every line
+            // Split on major section headers (### headings)
             const sections = text.split(/\n(?=###\s)/);
 
-            sections.forEach((section, index) => {
+            sections.forEach((section) => {
                 if (!section.trim()) return;
 
                 const sectionDiv = document.createElement('div');
@@ -809,125 +789,91 @@ You can copy-paste from:
                 .replace(/\n/g, '<br>');
         }
 
+        // Form submission
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const jobDescription = document.getElementById('jobDescription').value;
-            const resumeText = document.getElementById('resumeText').value;
+            // Validation
+            if (!hasFile) {
+                // Manual input - check required fields
+                if (!document.getElementById('jobDescription').value ||
+                    !document.getElementById('resumeText').value) {
+                    if (typeof toastError === 'function') {
+                        toastError('Missing Fields', 'Please fill in all required fields or upload a resume file');
+                    } else {
+                        alert('Please fill in all required fields or upload a resume file');
+                    }
+                    return;
+                }
+            } else {
+                // File mode - only JD is required
+                if (!document.getElementById('jobDescription').value) {
+                    if (typeof toastError === 'function') {
+                        toastError('Missing Field', 'Please provide the job description');
+                    } else {
+                        alert('Please provide the job description');
+                    }
+                    return;
+                }
+            }
 
-            // Show loading, hide result
             loading.classList.add('active');
             result.classList.remove('active');
             submitBtn.disabled = true;
 
             try {
-                const response = await fetch('/api/screen-resume', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ jobDescription, resumeText }),
-                });
+                let response, data;
 
-                const data = await response.json();
+                if (hasFile) {
+                    // File upload mode
+                    const formData = new FormData();
+                    formData.append('jobDescription', document.getElementById('jobDescription').value);
+                    formData.append('resume', fileInput.files[0]);
+
+                    response = await fetch('/api/screen-resume-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    data = await response.json();
+                } else {
+                    // Manual input mode
+                    const payload = {
+                        jobDescription: document.getElementById('jobDescription').value,
+                        resumeText: document.getElementById('resumeText').value
+                    };
+
+                    response = await fetch('/api/screen-resume', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    data = await response.json();
+                }
 
                 if (data.success) {
                     formatResult(data.analysis);
                     result.classList.add('active');
-                    toastSuccess('Resume Screened!', 'Analysis completed successfully');
+                    if (typeof toastSuccess === 'function') {
+                        toastSuccess('Resume Screened!', 'Analysis completed successfully');
+                    }
                 } else {
                     resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
                     result.classList.add('active');
-                    toastError('Screening Failed', data.error || 'Failed to screen resume');
+                    if (typeof toastError === 'function') {
+                        toastError('Screening Failed', data.error || 'Failed to screen resume');
+                    }
                 }
             } catch (error) {
                 resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                toastError('Error', error.message || 'An error occurred');
                 result.classList.add('active');
+                if (typeof toastError === 'function') {
+                    toastError('Error', error.message || 'An error occurred');
+                }
             } finally {
                 loading.classList.remove('active');
                 submitBtn.disabled = false;
             }
         });
-
-        // Tab switching
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-
-            if (tab === 'text') {
-                tabs[0].classList.add('active');
-                document.getElementById('textTab').classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('fileTab').classList.add('active');
-            }
-        }
-
-        // File input change handler
-        document.getElementById('resumeFile').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                document.getElementById('fileName').textContent = '✓ ' + fileName;
-            }
-        });
-
-        // File upload form handler
-        document.getElementById('fileUploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = new FormData();
-            formData.append('jobDescription', document.getElementById('jobDescriptionFile').value);
-            formData.append('resume', document.getElementById('resumeFile').files[0]);
-
-            loading.classList.add('active');
-            result.classList.remove('active');
-            document.getElementById('uploadBtn').disabled = true;
-
-            try {
-                const response = await fetch('/api/screen-resume-file', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    formatResult(data.analysis);
-                    result.classList.add('active');
-                } else {
-                    resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + data.error + '</div></div>';
-                    result.classList.add('active');
-                }
-            } catch (error) {
-                resultText.innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                result.classList.add('active');
-            } finally {
-                loading.classList.remove('active');
-                document.getElementById('uploadBtn').disabled = false;
-            }
-        });
-
-        // Generate floating particles
-        function createParticles() {
-            const container = document.getElementById('particles');
-            const particleCount = 20;
-
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.animation = `floatParticle ${15 + Math.random() * 10}s linear infinite`;
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                container.appendChild(particle);
-            }
-        }
-
-        // Initialize particles
-        createParticles();
     </script>
 </body>
 </html>

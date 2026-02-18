@@ -4,8 +4,9 @@
   "description": "Aria HR Agent integrated with Slack using Claude API",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node dashboard-server.js",
+    "dev": "nodemon dashboard-server.js",
+    "vercel-build": "echo 'Build complete'"
   },
   "keywords": [
     "slack",

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Comparison - Aria AI</title>
+    <link rel="stylesheet" href="/components/toast.css">
     <style>
         * {
             margin: 0;
@@ -148,6 +149,169 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
+        /* Mode Indicators */
+        .mode-indicators {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            justify-content: center;
+        }
+
+        .mode-badge {
+            padding: 10px 20px;
+            border-radius: 24px;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+        }
+
+        .mode-badge.active {
+            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
+            animation: slideIn 0.4s ease-out;
+        }
+
+        .mode-badge.inactive {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* File Upload Area */
+        .file-upload-section {
+            margin-bottom: 32px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .file-upload-area {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px dashed rgba(239, 167, 63, 0.4);
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at center, rgba(239, 167, 63, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .file-upload-area:hover::before {
+            opacity: 1;
+        }
+
+        .file-upload-area:hover {
+            border-color: #EFA73F;
+            background: rgba(239, 167, 63, 0.08);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(239, 167, 63, 0.2);
+        }
+
+        .file-upload-area.has-files {
+            border-color: #258D58;
+            background: rgba(37, 141, 88, 0.08);
+        }
+
+        .file-upload-area.has-files:hover {
+            border-color: #258D58;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .file-upload-area:hover .upload-icon {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        .upload-text {
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #a8b2d1;
+            font-size: 0.9em;
+        }
+
+        .file-count {
+            margin-top: 15px;
+            padding: 12px 24px;
+            background: rgba(37, 141, 88, 0.15);
+            border: 1px solid rgba(37, 141, 88, 0.3);
+            border-radius: 24px;
+            color: #4ade80;
+            font-weight: 600;
+            display: inline-block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 40px 0;
+            color: #a8b2d1;
+            font-weight: 600;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 20px;
+        }
+
+        /* Form Fields */
+        .form-section {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .form-section.faded {
+            opacity: 0.3;
+            pointer-events: none;
+            filter: blur(2px);
+        }
+
         label {
             display: block;
             margin-bottom: 12px;
@@ -155,6 +319,12 @@
             font-weight: 600;
             font-size: 1.1em;
             letter-spacing: 0.3px;
+        }
+
+        label .optional {
+            color: #a8b2d1;
+            font-size: 0.85em;
+            font-weight: 400;
         }
 
         textarea {
@@ -185,6 +355,7 @@
             color: rgba(255, 255, 255, 0.4);
         }
 
+        /* Submit Button */
         .btn {
             background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
             color: #FFFFFF;
@@ -199,6 +370,7 @@
             box-shadow: 0 8px 24px rgba(239, 167, 63, 0.3);
             position: relative;
             overflow: hidden;
+            width: 100%;
         }
 
         .btn::before {
@@ -234,6 +406,12 @@
             transform: none;
         }
 
+        .btn-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Loading State */
         .loading {
             display: none;
             text-align: center;
@@ -247,6 +425,22 @@
             animation: fadeIn 0.4s ease-out;
         }
 
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #EFA73F;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Results Section */
         .result {
             display: none;
             margin-top: 40px;
@@ -302,7 +496,7 @@
         }
 
         .result-section::after {
-            content: \'\';
+            content: '';
             position: absolute;
             top: 0;
             right: 0;
@@ -381,111 +575,7 @@
             font-size: 1.05em;
         }
 
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top: 4px solid #EFA73F;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 24px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .tabs {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 32px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            color: #a8b2d1;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .tab:hover {
-            background: rgba(255, 255, 255, 0.06);
-            border-color: rgba(239, 167, 63, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
-            color: #FFFFFF;
-            border-color: transparent;
-            box-shadow: 0 4px 16px rgba(239, 167, 63, 0.3);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        .file-upload-area {
-            background: rgba(255, 255, 255, 0.04);
-            border: 2px dashed rgba(239, 167, 63, 0.4);
-            border-radius: 16px;
-            padding: 48px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 24px;
-        }
-
-        .file-upload-area:hover {
-            border-color: #EFA73F;
-            background: rgba(239, 167, 63, 0.08);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(239, 167, 63, 0.2);
-        }
-
-        .file-upload-area input[type="file"] {
-            display: none;
-        }
-
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 32px;
@@ -525,6 +615,33 @@
             90% { opacity: 0.3; }
             100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -537,40 +654,49 @@
         </div>
 
         <div class="card">
-            <div class="tabs">
-                <div class="tab active" onclick="switchTab('text')">Paste Text</div>
-                <div class="tab" onclick="switchTab('file')">Upload Files</div>
+            <!-- Mode Indicators -->
+            <div class="mode-indicators">
+                <div class="mode-badge" id="manualBadge">✍️ Manual Input</div>
+                <div class="mode-badge" id="fileBadge">📄 File Mode</div>
             </div>
 
-            <div id="textTab" class="tab-content active">
-                <form id="compareForm">
-                    <label>Job Description:</label>
-                    <textarea id="jd" required></textarea>
-                    <label>Candidate 1 Resume:</label>
-                    <textarea id="resume1" required></textarea>
-                    <label>Candidate 2 Resume:</label>
-                    <textarea id="resume2" required></textarea>
-                    <label>Candidate 3 Resume (optional):</label>
-                    <textarea id="resume3"></textarea>
-                    <button type="submit" class="btn">Compare Candidates</button>
-                </form>
-            </div>
-
-            <div id="fileTab" class="tab-content">
-                <form id="fileUploadForm" enctype="multipart/form-data">
-                    <label>Job Description:</label>
-                    <textarea id="jdFile" required></textarea>
-                    <label>Upload Resume Files (2-3 files):</label>
-                    <div class="file-upload-area" onclick="document.getElementById('resumeFiles').click()">
-                        <input type="file" id="resumeFiles" name="resumes" accept=".pdf,.doc,.docx,.txt" multiple required>
-                        <div style="font-size: 3em; margin-bottom: 15px;">📄</div>
-                        <div style="color: #EFA73F; font-weight: 600; font-size: 1.1em; margin-bottom: 10px;">Click to upload 2-3 resume files</div>
-                        <div style="color: #a8b2d1; font-size: 0.9em;">Supports PDF, DOC, DOCX, TXT (Max 10MB each)</div>
-                        <div id="fileNames" style="margin-top: 15px; color: #258D58; font-weight: 600;"></div>
+            <form id="compareForm">
+                <!-- File Upload Section -->
+                <div class="file-upload-section">
+                    <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('resumeFiles').click()">
+                        <input type="file" id="resumeFiles" name="resumes" accept=".pdf,.doc,.docx,.txt" multiple>
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">Click to upload 2-5 resume files</div>
+                        <div class="upload-hint">Supports PDF, DOC, DOCX, TXT (Max 10MB each)</div>
+                        <div id="fileCount" class="file-count" style="display: none;"></div>
                     </div>
-                    <button type="submit" class="btn">Compare Uploaded Resumes</button>
-                </form>
-            </div>
+                </div>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>OR ENTER DETAILS MANUALLY</span>
+                </div>
+
+                <!-- Manual Input Section -->
+                <div class="form-section" id="manualSection">
+                    <label>Job Description:</label>
+                    <textarea id="jd" placeholder="Paste the job description here..."></textarea>
+
+                    <label>Candidate 1 Resume:</label>
+                    <textarea id="resume1" placeholder="Paste first candidate's resume here..."></textarea>
+
+                    <label>Candidate 2 Resume:</label>
+                    <textarea id="resume2" placeholder="Paste second candidate's resume here..."></textarea>
+
+                    <label>Candidate 3 Resume <span class="optional">(optional)</span>:</label>
+                    <textarea id="resume3" placeholder="Paste third candidate's resume here (optional)..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn" id="submitBtn">
+                    <span class="btn-text" id="btnText">Compare Candidates</span>
+                </button>
+            </form>
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
@@ -589,6 +715,187 @@
     </div>
 
     <script>
+        let currentMode = 'manual'; // 'manual' or 'file'
+        let uploadedFiles = [];
+
+        // Update mode badges
+        function updateModeBadges() {
+            const manualBadge = document.getElementById('manualBadge');
+            const fileBadge = document.getElementById('fileBadge');
+
+            if (currentMode === 'file') {
+                manualBadge.classList.remove('active');
+                manualBadge.classList.add('inactive');
+                fileBadge.classList.remove('inactive');
+                fileBadge.classList.add('active');
+            } else {
+                fileBadge.classList.remove('active');
+                fileBadge.classList.add('inactive');
+                manualBadge.classList.remove('inactive');
+                manualBadge.classList.add('active');
+            }
+        }
+
+        // Update button text based on mode
+        function updateButtonText() {
+            const btnText = document.getElementById('btnText');
+            if (currentMode === 'file') {
+                btnText.textContent = 'Compare Uploaded Resumes';
+            } else {
+                btnText.textContent = 'Compare Candidates';
+            }
+        }
+
+        // Handle file upload
+        document.getElementById('resumeFiles').addEventListener('change', function(e) {
+            uploadedFiles = Array.from(e.target.files);
+            const fileCount = uploadedFiles.length;
+            const fileCountDiv = document.getElementById('fileCount');
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const manualSection = document.getElementById('manualSection');
+
+            if (fileCount > 0) {
+                // Switch to file mode
+                currentMode = 'file';
+                updateModeBadges();
+                updateButtonText();
+
+                // Show file count
+                fileCountDiv.textContent = `✓ ${fileCount} file${fileCount > 1 ? 's' : ''} selected: ${uploadedFiles.map(f => f.name).join(', ')}`;
+                fileCountDiv.style.display = 'inline-block';
+                fileUploadArea.classList.add('has-files');
+
+                // Fade manual section
+                manualSection.classList.add('faded');
+            } else {
+                // Switch back to manual mode
+                currentMode = 'manual';
+                updateModeBadges();
+                updateButtonText();
+
+                fileCountDiv.style.display = 'none';
+                fileUploadArea.classList.remove('has-files');
+                manualSection.classList.remove('faded');
+            }
+        });
+
+        // Handle manual input changes
+        ['jd', 'resume1', 'resume2', 'resume3'].forEach(id => {
+            document.getElementById(id).addEventListener('input', function() {
+                const hasManualInput = document.getElementById('jd').value.trim() ||
+                                       document.getElementById('resume1').value.trim() ||
+                                       document.getElementById('resume2').value.trim() ||
+                                       document.getElementById('resume3').value.trim();
+
+                if (hasManualInput && uploadedFiles.length === 0) {
+                    currentMode = 'manual';
+                    updateModeBadges();
+                    updateButtonText();
+                }
+            });
+        });
+
+        // Initialize mode badges
+        updateModeBadges();
+
+        // Form submission
+        document.getElementById('compareForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('result').classList.remove('active');
+
+            try {
+                let response;
+
+                if (currentMode === 'file' && uploadedFiles.length >= 2) {
+                    // File mode - validate
+                    const jd = document.getElementById('jd').value.trim();
+
+                    if (!jd) {
+                        if (typeof toastError === 'function') {
+                            toastError('Missing Job Description', 'Please provide a job description');
+                        } else {
+                            alert('Please provide a job description');
+                        }
+                        document.getElementById('loading').classList.remove('active');
+                        return;
+                    }
+
+                    if (uploadedFiles.length < 2) {
+                        if (typeof toastError === 'function') {
+                            toastError('Not Enough Files', 'Please upload at least 2 resumes to compare');
+                        } else {
+                            alert('Please upload at least 2 resumes to compare');
+                        }
+                        document.getElementById('loading').classList.remove('active');
+                        return;
+                    }
+
+                    if (uploadedFiles.length > 5) {
+                        if (typeof toastError === 'function') {
+                            toastError('Too Many Files', 'Maximum 5 resumes can be compared at once');
+                        } else {
+                            alert('Maximum 5 resumes can be compared at once');
+                        }
+                        document.getElementById('loading').classList.remove('active');
+                        return;
+                    }
+
+                    // Send file data
+                    const formData = new FormData();
+                    formData.append('jd', jd);
+                    uploadedFiles.forEach(file => formData.append('resumes', file));
+
+                    response = await fetch('/api/compare-candidates-files', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // Manual mode - validate
+                    const jd = document.getElementById('jd').value.trim();
+                    const resume1 = document.getElementById('resume1').value.trim();
+                    const resume2 = document.getElementById('resume2').value.trim();
+                    const resume3 = document.getElementById('resume3').value.trim();
+
+                    if (!jd || !resume1 || !resume2) {
+                        if (typeof toastError === 'function') {
+                            toastError('Missing Information', 'Please provide job description and at least 2 resumes');
+                        } else {
+                            alert('Please provide job description and at least 2 resumes');
+                        }
+                        document.getElementById('loading').classList.remove('active');
+                        return;
+                    }
+
+                    const data = {
+                        jd: jd,
+                        resumes: [resume1, resume2, resume3].filter(r => r)
+                    };
+
+                    response = await fetch('/api/compare-candidates', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    formatResult(result.comparison);
+                    document.getElementById('result').classList.add('active');
+                } else {
+                    document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + result.error + '</div></div>';
+                    document.getElementById('result').classList.add('active');
+                }
+            } catch (error) {
+                document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
+                document.getElementById('result').classList.add('active');
+            }
+
+            document.getElementById('loading').classList.remove('active');
+        });
+
         function showToast(message) {
             const toast = document.getElementById('copyToast');
             toast.textContent = message;
@@ -616,7 +923,6 @@
         function formatResult(text) {
             const resultText = document.getElementById('resultText');
             resultText.innerHTML = '';
-            // Only split on major section headers (### headings), not on every line
             const sections = text.split(/\n(?=###\s)/);
 
             sections.forEach((section, index) => {
@@ -629,7 +935,6 @@
                 let title = 'Candidate Comparison';
                 let content = section;
 
-                // Extract title from ### heading
                 if (section.match(/^###\s+(.+)/m)) {
                     const match = section.match(/^###\s+(.+)/m);
                     title = match[1];
@@ -680,86 +985,6 @@
                 .replace(/\n/g, '<br>');
         }
 
-        function switchTab(tab) {
-            const tabs = document.querySelectorAll('.tab');
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabs.forEach(t => t.classList.remove('active'));
-            tabContents.forEach(tc => tc.classList.remove('active'));
-            if (tab === 'text') {
-                tabs[0].classList.add('active');
-                document.getElementById('textTab').classList.add('active');
-            } else {
-                tabs[1].classList.add('active');
-                document.getElementById('fileTab').classList.add('active');
-            }
-        }
-
-        document.getElementById('resumeFiles').addEventListener('change', function(e) {
-            const fileNames = Array.from(e.target.files).map(f => f.name).join(', ');
-            if (fileNames) document.getElementById('fileNames').textContent = '✓ ' + fileNames;
-        });
-
-        document.getElementById('compareForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = {
-                jd: document.getElementById('jd').value,
-                resumes: [
-                    document.getElementById('resume1').value,
-                    document.getElementById('resume2').value,
-                    document.getElementById('resume3').value
-                ].filter(r => r)
-            };
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('result').classList.remove('active');
-            try {
-                const response = await fetch('/api/compare-candidates', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
-                if (result.success) {
-                    formatResult(result.comparison);
-                    document.getElementById('result').classList.add('active');
-                } else {
-                    document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + result.error + '</div></div>';
-                    document.getElementById('result').classList.add('active');
-                }
-            } catch (error) {
-                document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                document.getElementById('result').classList.add('active');
-            }
-            document.getElementById('loading').classList.remove('active');
-        });
-
-        document.getElementById('fileUploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const formData = new FormData();
-            formData.append('jd', document.getElementById('jdFile').value);
-            const files = document.getElementById('resumeFiles').files;
-            for (let file of files) formData.append('resumes', file);
-            document.getElementById('loading').classList.add('active');
-            document.getElementById('result').classList.remove('active');
-            try {
-                const response = await fetch('/api/compare-candidates-files', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                if (result.success) {
-                    formatResult(result.comparison);
-                    document.getElementById('result').classList.add('active');
-                } else {
-                    document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + result.error + '</div></div>';
-                    document.getElementById('result').classList.add('active');
-                }
-            } catch (error) {
-                document.getElementById('resultText').innerHTML = '<div class="result-section"><div class="section-content" style="color: #ff6b6b;">Error: ' + error.message + '</div></div>';
-                document.getElementById('result').classList.add('active');
-            }
-            document.getElementById('loading').classList.remove('active');
-        });
-        
         function createParticles() {
             const container = document.body;
             const particleCount = 20;
@@ -774,5 +999,6 @@
         }
         createParticles();
     </script>
+    <script src="/components/toast.js"></script>
 </body>
 </html>

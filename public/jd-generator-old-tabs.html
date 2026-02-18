@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JD Generator - Aria AI</title>
+    <link rel="stylesheet" href="/components/toast.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1A1A1A;
+            min-height: 100vh;
+            color: #FFFFFF;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at top right, rgba(239, 167, 63, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom left, rgba(37, 141, 88, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at center, rgba(186, 93, 7, 0.08) 0%, transparent 70%);
+            animation: meshMove 30s ease-in-out infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -30%;
+            left: -20%;
+            width: 70%;
+            height: 70%;
+            background: radial-gradient(circle, rgba(37, 141, 88, 0.12) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatReverse 25s ease-in-out infinite;
+            z-index: 0;
+            pointer-events: none;
+        }
+        @keyframes meshMove {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.05); }
+        }
+        .container { max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #EFA73F 0%, #f4c15d 25%, #EFA73F 50%, #258D58 75%, #2ea76a 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            font-weight: 800;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 8s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 100% center; }
+        }
+        .back-btn {
+            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
+            color: #FFFFFF;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95em;
+            margin-bottom: 20px;
+        }
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(239, 167, 63, 0.4);
+        }
+        .card {
+            background: linear-gradient(135deg, #313131 0%, #464646 100%);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(239, 167, 63, 0.15);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Unified Input Mode Indicator */
+        .mode-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.4s ease;
+        }
+        .mode-indicator.file-mode {
+            background: rgba(239, 167, 63, 0.1);
+            border-color: rgba(239, 167, 63, 0.3);
+        }
+        .mode-icon {
+            font-size: 1.3em;
+            transition: all 0.3s ease;
+        }
+        .mode-text {
+            color: #a8b2d1;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+        }
+        .mode-indicator.file-mode .mode-text {
+            color: #EFA73F;
+            font-weight: 600;
+        }
+
+        /* Unified File Upload Zone - Always Visible */
+        .unified-file-zone {
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px dashed rgba(239, 167, 63, 0.3);
+            border-radius: 16px;
+            padding: 35px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 35px;
+            position: relative;
+            overflow: hidden;
+        }
+        .unified-file-zone::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(239, 167, 63, 0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .unified-file-zone:hover::before {
+            opacity: 1;
+        }
+        .unified-file-zone:hover {
+            border-color: #EFA73F;
+            background: rgba(239, 167, 63, 0.08);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(239, 167, 63, 0.25);
+        }
+        .unified-file-zone.drag-over {
+            border-color: #258D58;
+            background: rgba(37, 141, 88, 0.12);
+            transform: scale(1.02);
+            box-shadow: 0 0 0 4px rgba(37, 141, 88, 0.2);
+        }
+        .unified-file-zone.has-file {
+            border-color: #258D58;
+            background: linear-gradient(135deg, rgba(37, 141, 88, 0.15) 0%, rgba(46, 167, 106, 0.1) 100%);
+            border-style: solid;
+        }
+        .unified-file-zone input[type="file"] {
+            display: none;
+        }
+        .file-zone-content {
+            position: relative;
+            z-index: 1;
+        }
+        .file-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            transition: all 0.3s ease;
+        }
+        .unified-file-zone:hover .file-icon {
+            transform: scale(1.1);
+        }
+        .file-title {
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.15em;
+            margin-bottom: 8px;
+        }
+        .file-subtitle {
+            color: #a8b2d1;
+            font-size: 0.95em;
+            margin-bottom: 12px;
+        }
+        .file-formats {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85em;
+        }
+        .file-name-display {
+            margin-top: 18px;
+            padding: 12px 20px;
+            background: rgba(37, 141, 88, 0.2);
+            border-radius: 8px;
+            color: #4ade80;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .file-name-display.active {
+            display: flex;
+        }
+        .clear-file-btn {
+            background: rgba(255, 107, 107, 0.2);
+            border: none;
+            color: #ff6b6b;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .clear-file-btn:hover {
+            background: rgba(255, 107, 107, 0.3);
+            transform: scale(1.05);
+        }
+
+        /* Divider */
+        .input-divider {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        .input-divider::before,
+        .input-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        }
+
+        /* Form Fields */
+        .form-fields {
+            transition: all 0.4s ease;
+        }
+        .form-fields.file-active {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: blur(1px);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #EFA73F;
+            font-weight: 600;
+            font-size: 1.05em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .optional-badge {
+            font-size: 0.75em;
+            color: #a8b2d1;
+            background: rgba(168, 178, 209, 0.15);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+            font-size: 1em;
+            font-family: inherit;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #EFA73F;
+            box-shadow: 0 0 0 4px rgba(239, 167, 63, 0.15), 0 0 20px rgba(239, 167, 63, 0.2), 0 8px 24px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+        textarea { min-height: 100px; resize: vertical; }
+
+        .btn {
+            background: linear-gradient(135deg, #EFA73F 0%, #BA5D07 100%);
+            color: #FFFFFF;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        .btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(239, 167, 63, 0.45);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #EFA73F;
+            font-size: 1.2em;
+        }
+        .loading.active { display: block; }
+        .result {
+            display: none;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 1px solid rgba(239, 167, 63, 0.3);
+        }
+        .result.active { display: block; }
+        .result h3 {
+            color: #EFA73F;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        .result pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 2;
+            color: #e6e6e6;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.05em;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid #EFA73F;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #EFA73F;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Floating Particles */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: #EFA735;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.3;
+            z-index: 0;
+        }
+        @keyframes floatParticle {
+            0% { transform: translateY(100vh) translateX(0); opacity: 0; }
+            10% { opacity: 0.3; }
+            90% { opacity: 0.3; }
+            100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
+        }
+    </style>
+    <script src="/components/toast.js"></script>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-btn">← Back to Home</a>
+        <div class="header">
+            <h1>Job Description Generator</h1>
+            <p style="color: #a8b2d1;">Create professional JDs in seconds</p>
+        </div>
+        <div class="card">
+            <!-- Mode Indicator -->
+            <div class="mode-indicator" id="modeIndicator">
+                <span class="mode-icon" id="modeIcon">✍️</span>
+                <span class="mode-text" id="modeText">Fill in the details below or upload an existing JD</span>
+            </div>
+
+            <form id="unifiedForm" enctype="multipart/form-data">
+                <!-- Unified File Upload Zone - Always Visible -->
+                <div class="unified-file-zone" id="fileZone" onclick="document.getElementById('existingJD').click()">
+                    <input type="file" id="existingJD" name="existingJD" accept=".pdf,.doc,.docx,.txt">
+                    <div class="file-zone-content">
+                        <div class="file-icon">📄</div>
+                        <div class="file-title">Drop your existing JD here</div>
+                        <div class="file-subtitle">or click to browse</div>
+                        <div class="file-formats">Supports PDF, DOC, DOCX, TXT (Max 10MB)</div>
+                        <div class="file-name-display" id="fileNameDisplay">
+                            <span id="fileName"></span>
+                            <button type="button" class="clear-file-btn" onclick="event.stopPropagation(); clearFile();">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-divider">OR ENTER DETAILS MANUALLY</div>
+
+                <!-- Form Fields - Always Visible -->
+                <div class="form-fields" id="formFields">
+                    <label for="jobTitle">
+                        Job Title
+                        <span class="optional-badge" id="jobTitleBadge">required</span>
+                    </label>
+                    <input type="text" id="jobTitle" name="jobTitle" placeholder="e.g., Senior Backend Engineer">
+
+                    <label for="experience">
+                        Experience Required
+                        <span class="optional-badge" id="experienceBadge">required</span>
+                    </label>
+                    <input type="text" id="experience" name="experience" placeholder="e.g., 4-6 years">
+
+                    <label for="skills">
+                        Key Skills (comma-separated)
+                        <span class="optional-badge" id="skillsBadge">required</span>
+                    </label>
+                    <textarea id="skills" name="skills" placeholder="e.g., Python, Django, AWS, PostgreSQL, Microservices"></textarea>
+
+                    <label for="location">
+                        Location
+                        <span class="optional-badge" id="locationBadge">required</span>
+                    </label>
+                    <input type="text" id="location" name="location" placeholder="e.g., Noida / Remote">
+
+                    <label for="additional">
+                        Additional Requirements
+                        <span class="optional-badge">optional</span>
+                    </label>
+                    <textarea id="additional" name="additional" placeholder="e.g., OTT/Video streaming experience preferred, startup mindset"></textarea>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    <span style="position: relative; z-index: 1;">Generate Job Description</span>
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                AI is creating your job description...
+            </div>
+
+            <div class="result" id="result">
+                <h3>Your Job Description:</h3>
+                <pre id="resultText"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let hasFile = false;
+        const fileInput = document.getElementById('existingJD');
+        const fileZone = document.getElementById('fileZone');
+        const fileNameDisplay = document.getElementById('fileNameDisplay');
+        const fileName = document.getElementById('fileName');
+        const formFields = document.getElementById('formFields');
+        const modeIndicator = document.getElementById('modeIndicator');
+        const modeIcon = document.getElementById('modeIcon');
+        const modeText = document.getElementById('modeText');
+
+        // Update mode indicator and form state
+        function updateMode(isFileMode) {
+            hasFile = isFileMode;
+
+            if (isFileMode) {
+                modeIndicator.classList.add('file-mode');
+                modeIcon.textContent = '📄';
+                modeText.textContent = 'File uploaded - AI will improve your existing JD';
+                formFields.classList.add('file-active');
+
+                // Make fields optional when file is uploaded
+                document.getElementById('jobTitleBadge').textContent = 'optional';
+                document.getElementById('experienceBadge').textContent = 'optional';
+                document.getElementById('skillsBadge').textContent = 'optional';
+                document.getElementById('locationBadge').textContent = 'optional';
+            } else {
+                modeIndicator.classList.remove('file-mode');
+                modeIcon.textContent = '✍️';
+                modeText.textContent = 'Fill in the details below or upload an existing JD';
+                formFields.classList.remove('file-active');
+
+                // Make fields required when no file
+                document.getElementById('jobTitleBadge').textContent = 'required';
+                document.getElementById('experienceBadge').textContent = 'required';
+                document.getElementById('skillsBadge').textContent = 'required';
+                document.getElementById('locationBadge').textContent = 'required';
+            }
+        }
+
+        // File input change handler
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = '✓ ' + file.name;
+                fileNameDisplay.classList.add('active');
+                fileZone.classList.add('has-file');
+                updateMode(true);
+            }
+        });
+
+        // Clear file function
+        function clearFile() {
+            fileInput.value = '';
+            fileName.textContent = '';
+            fileNameDisplay.classList.remove('active');
+            fileZone.classList.remove('has-file');
+            updateMode(false);
+        }
+
+        // Drag and drop handlers
+        fileZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileZone.classList.add('drag-over');
+        });
+
+        fileZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileZone.classList.remove('drag-over');
+        });
+
+        fileZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileZone.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                // Check file type
+                const validTypes = ['.pdf', '.doc', '.docx', '.txt'];
+                const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+                if (validTypes.includes(fileExt)) {
+                    fileInput.files = files;
+                    fileName.textContent = '✓ ' + file.name;
+                    fileNameDisplay.classList.add('active');
+                    fileZone.classList.add('has-file');
+                    updateMode(true);
+                } else {
+                    toastError('Invalid File Type', 'Please upload PDF, DOC, DOCX, or TXT files only');
+                }
+            }
+        });
+
+        // Unified form handler
+        document.getElementById('unifiedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const resultText = document.getElementById('resultText');
+
+            // Validation
+            if (hasFile) {
+                // File mode - file is required, other fields are optional
+                if (!fileInput.files[0]) {
+                    toastError('No File', 'Please upload a file');
+                    return;
+                }
+            } else {
+                // Text mode - all fields are required
+                const jobTitle = document.getElementById('jobTitle').value.trim();
+                const experience = document.getElementById('experience').value.trim();
+                const skills = document.getElementById('skills').value.trim();
+                const location = document.getElementById('location').value.trim();
+
+                if (!jobTitle || !experience || !skills || !location) {
+                    toastError('Missing Fields', 'Please fill in all required fields or upload a file');
+                    return;
+                }
+            }
+
+            loading.classList.add('active');
+            result.classList.remove('active');
+            submitBtn.disabled = true;
+
+            try {
+                let response;
+
+                if (hasFile) {
+                    // File upload mode
+                    const formData = new FormData();
+                    formData.append('existingJD', fileInput.files[0]);
+                    formData.append('jobTitle', document.getElementById('jobTitle').value || '');
+                    formData.append('experience', document.getElementById('experience').value || '');
+                    formData.append('skills', document.getElementById('skills').value || '');
+                    formData.append('location', document.getElementById('location').value || '');
+
+                    response = await fetch('/api/generate-jd-file', {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // Text input mode
+                    const data = {
+                        jobTitle: document.getElementById('jobTitle').value,
+                        experience: document.getElementById('experience').value,
+                        skills: document.getElementById('skills').value,
+                        location: document.getElementById('location').value,
+                        additional: document.getElementById('additional').value
+                    };
+
+                    response = await fetch('/api/generate-jd', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    resultText.textContent = data.jd;
+                    result.classList.add('active');
+                    toastSuccess('JD Generated!', 'Your job description has been created successfully');
+                } else {
+                    resultText.textContent = 'Error: ' + data.error;
+                    result.classList.add('active');
+                    toastError('Generation Failed', data.error || 'Failed to generate job description');
+                }
+            } catch (error) {
+                resultText.textContent = 'Error: ' + error.message;
+                result.classList.add('active');
+                toastError('Error', error.message || 'An error occurred');
+            } finally {
+                loading.classList.remove('active');
+                submitBtn.disabled = false;
+            }
+        });
+
+        // Create particles
+        function createParticles() {
+            const container = document.body;
+            const particleCount = 20;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animation = `floatParticle ${15 + Math.random() * 10}s linear infinite`;
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+    </script>
+</body>
+</html>

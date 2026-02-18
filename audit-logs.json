@@ -1,6 +1,276 @@
 {
   "logs": [
     {
+      "id": "log_1771394243546_3xll098dw",
+      "timestamp": "2026-02-18T05:57:23.546Z",
+      "action": "USER_LOGIN",
+      "userId": "admin001",
+      "username": "admin",
+      "details": {
+        "role": "admin",
+        "email": "admin@stage.in"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231929416_i9x35yr7c",
+      "timestamp": "2026-02-16T08:52:09.416Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "nonexistent",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889543_pyxlfu8jk",
+      "timestamp": "2026-02-16T08:51:29.543Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889526_f6zujoy9t",
+      "timestamp": "2026-02-16T08:51:29.526Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889515_t56pslowy",
+      "timestamp": "2026-02-16T08:51:29.515Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889504_bq4xsmeam",
+      "timestamp": "2026-02-16T08:51:29.504Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889492_an1nzdaqu",
+      "timestamp": "2026-02-16T08:51:29.492Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889478_mn3x5kteb",
+      "timestamp": "2026-02-16T08:51:29.478Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889466_pv2vc8q2g",
+      "timestamp": "2026-02-16T08:51:29.466Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889455_h3jhw8yck",
+      "timestamp": "2026-02-16T08:51:29.455Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889443_1o84cuk0p",
+      "timestamp": "2026-02-16T08:51:29.443Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889431_rya1yjorh",
+      "timestamp": "2026-02-16T08:51:29.431Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "test",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889420_boznk0hso",
+      "timestamp": "2026-02-16T08:51:29.420Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "${7*7}",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889409_u6z8vpac0",
+      "timestamp": "2026-02-16T08:51:29.409Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "../../../etc/passwd",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889398_fam6chlz6",
+      "timestamp": "2026-02-16T08:51:29.398Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "<script>alert('xss')</script>",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771231889384_pjbuk1dzy",
+      "timestamp": "2026-02-16T08:51:29.384Z",
+      "action": "LOGIN_FAILED",
+      "userId": "unknown",
+      "username": "admin' OR '1'='1",
+      "details": {
+        "reason": "Invalid credentials"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771226447319_cx0bl2a58",
+      "timestamp": "2026-02-16T07:20:47.319Z",
+      "action": "USER_LOGIN",
+      "userId": "admin001",
+      "username": "admin",
+      "details": {
+        "role": "admin",
+        "email": "admin@stage.in"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771226436377_fty2qqj6b",
+      "timestamp": "2026-02-16T07:20:36.377Z",
+      "action": "LOGIN_DENIED",
+      "userId": "user_1770274919049_d7rrkh91a",
+      "username": "ankitsaxena",
+      "details": {
+        "reason": "Account status: rejected"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771224064366_f1huj7e3g",
+      "timestamp": "2026-02-16T06:41:04.366Z",
+      "action": "USER_LOGIN",
+      "userId": "admin001",
+      "username": "admin",
+      "details": {
+        "role": "admin",
+        "email": "admin@stage.in"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1771222280242_pt6lfvghd",
+      "timestamp": "2026-02-16T06:11:20.242Z",
+      "action": "USER_LOGIN",
+      "userId": "admin001",
+      "username": "admin",
+      "details": {
+        "role": "admin",
+        "email": "admin@stage.in"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1770980884715_lb4wass9b",
+      "timestamp": "2026-02-13T11:08:04.715Z",
+      "action": "USER_LOGIN",
+      "userId": "admin001",
+      "username": "admin",
+      "details": {
+        "role": "admin",
+        "email": "admin@stage.in"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
+      "id": "log_1770980838233_8pubvitag",
+      "timestamp": "2026-02-13T11:07:18.233Z",
+      "action": "USER_LOGIN",
+      "userId": "admin001",
+      "username": "admin",
+      "details": {
+        "role": "admin",
+        "email": "admin@stage.in"
+      },
+      "ipAddress": "::1",
+      "userAgent": "unknown"
+    },
+    {
       "id": "log_1770977446493_f9gap5cvs",
       "timestamp": "2026-02-13T10:10:46.493Z",
       "action": "USER_LOGIN",
