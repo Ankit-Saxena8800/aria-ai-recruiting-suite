@@ -170,8 +170,9 @@ const anthropic = new Anthropic({
 });
 
 // Configure multer for file uploads
+// Use /tmp for Vercel serverless (only writable directory)
 const upload = multer({
-  dest: 'uploads/',
+  dest: '/tmp/uploads/',
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
