@@ -260,7 +260,7 @@ async function extractTextFromFile(filePath, mimetype) {
 }
 
 // Serve static files
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // API endpoint for candidate sourcing with file upload
 app.post('/api/source-candidates-file', upload.single('jdFile'), async (req, res) => {
