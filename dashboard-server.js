@@ -1795,8 +1795,13 @@ app.get('/api/status', authenticateToken, requireAdmin, (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`
+// Export for Vercel serverless
+module.exports = app;
+
+// For local development
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║       📊 Aria Hiring Dashboard - WEB VERSION               ║
 ╚════════════════════════════════════════════════════════════╝
@@ -1814,4 +1819,5 @@ Press Ctrl+C to stop
 ---
 Built by Ankit Saxena | Powered by Aria AI
 `);
-});
+  });
+}
