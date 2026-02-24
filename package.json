@@ -20,7 +20,9 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
     "@google/generative-ai": "^0.24.1",
+    "@neondatabase/serverless": "^1.0.2",
     "@slack/bolt": "^3.17.1",
+    "@vercel/postgres": "^0.10.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^16.4.1",
     "express-rate-limit": "^8.2.1",

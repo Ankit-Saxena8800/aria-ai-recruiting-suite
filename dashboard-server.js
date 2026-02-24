@@ -18,7 +18,15 @@ const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
+// Database functions
+const db = require('./db');
+
 const app = express();
+
+// Initialize database tables on startup
+db.initDatabase().catch(err => {
+  console.error('Failed to initialize database:', err);
+});
 
 // ============================================================================
 // SECURITY MIDDLEWARE
@@ -852,59 +860,36 @@ const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CALLBACK_URL
 );
 
-// Helper functions for user management
-function readUsersFile() {
-  try {
-    const data = fsSync.readFileSync(USERS_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    return { users: [], admins: [] };
-  }
+// Helper functions for user management (now using database)
+async function readUsersFile() {
+  // Kept for backward compatibility - returns data in old format
+  const users = await db.getAllUsers();
+  return { users, admins: [], blacklist: [] };
 }
 
 function writeUsersFile(data) {
-  fsSync.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2));
+  // Deprecated - data is now written directly to database
+  console.log('writeUsersFile called but data is now in database');
 }
 
-// Audit logging functions
-const AUDIT_LOG_FILE = path.join(__dirname, 'audit-logs.json');
-
-function readAuditLogs() {
+// Audit logging functions (now using database)
+async function logAudit(action, userId, username, details = {}, ipAddress = 'unknown') {
   try {
-    const data = fsSync.readFileSync(AUDIT_LOG_FILE, 'utf8');
-    return JSON.parse(data);
+    const logEntry = {
+      id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      action,
+      userId,
+      username,
+      details,
+      ipAddress,
+      userAgent: details.userAgent || 'unknown'
+    };
+
+    await db.createAuditLog(logEntry);
+    console.log(`📝 Audit: ${action} by ${username} (${userId})`);
   } catch (error) {
-    return { logs: [] };
+    console.error('Audit log error:', error);
   }
-}
-
-function writeAuditLogs(data) {
-  fsSync.writeFileSync(AUDIT_LOG_FILE, JSON.stringify(data, null, 2));
-}
-
-function logAudit(action, userId, username, details = {}, ipAddress = 'unknown') {
-  const auditData = readAuditLogs();
-
-  const logEntry = {
-    id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    timestamp: new Date().toISOString(),
-    action,
-    userId,
-    username,
-    details,
-    ipAddress,
-    userAgent: details.userAgent || 'unknown'
-  };
-
-  auditData.logs.unshift(logEntry); // Add to beginning for recent-first order
-
-  // Keep only last 1000 logs to prevent file from growing too large
-  if (auditData.logs.length > 1000) {
-    auditData.logs = auditData.logs.slice(0, 1000);
-  }
-
-  writeAuditLogs(auditData);
-  console.log(`📝 Audit: ${action} by ${username} (${userId})`);
 }
 
 // ============================================================================
@@ -1016,34 +1001,18 @@ app.post('/api/register',
 
     const { firstName, lastName, email, username, password, department } = req.body;
 
-    const usersData = readUsersFile();
-
     // Check blacklist first
-    if (usersData.blacklist && usersData.blacklist.length > 0) {
-      const isBlacklisted = usersData.blacklist.some(
-        b => b.email === email || b.username === username
-      );
-
-      if (isBlacklisted) {
-        return res.json({
-          success: false,
-          message: 'This email or username has been blocked. Please contact the administrator.'
-        });
-      }
+    const blacklisted = await db.isBlacklisted(email, username);
+    if (blacklisted) {
+      return res.json({
+        success: false,
+        message: 'This email or username has been blocked. Please contact the administrator.'
+      });
     }
 
-    // Check if username or email already exists (including soft-deleted)
-    const existingUser = [...usersData.users, ...usersData.admins].find(
-      u => u.username === username || u.email === email
-    );
-
+    // Check if username or email already exists
+    const existingUser = await db.userExists(email, username);
     if (existingUser) {
-      if (existingUser.status === 'deleted') {
-        return res.json({
-          success: false,
-          message: 'This account was previously deleted. Please contact the administrator to reactivate or use a different email.'
-        });
-      }
       return res.json({ success: false, message: 'Username or email already exists' });
     }
 
@@ -1051,7 +1020,7 @@ app.post('/api/register',
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new user
-    const newUser = {
+    const userData = {
       id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       firstName,
       lastName,
@@ -1064,11 +1033,10 @@ app.post('/api/register',
       requestedAt: new Date().toISOString()
     };
 
-    usersData.users.push(newUser);
-    writeUsersFile(usersData);
+    const newUser = await db.createUser(userData);
 
     // Log audit
-    logAudit('USER_REGISTERED', newUser.id, newUser.username, {
+    await logAudit('USER_REGISTERED', newUser.id, newUser.username, {
       email: newUser.email,
       department: newUser.department
     }, req.ip);
@@ -1104,12 +1072,8 @@ app.post('/api/login',
 
     const { username, password } = req.body;
 
-    const usersData = readUsersFile();
-
     // Check admins first (allow login with username OR email)
-    const admin = usersData.admins.find(
-      a => (a.username === username || a.email === username)
-    );
+    const admin = await db.getAdminByUsername(username);
 
     if (admin) {
       // Verify password with bcrypt
@@ -1117,7 +1081,7 @@ app.post('/api/login',
 
       if (isValidPassword) {
         // Log audit
-        logAudit('USER_LOGIN', admin.id, admin.username, {
+        await logAudit('USER_LOGIN', admin.id, admin.username, {
           role: 'admin',
           email: admin.email
         }, req.ip);
@@ -1136,13 +1100,11 @@ app.post('/api/login',
     }
 
     // Check regular users (allow login with username OR email)
-    const user = usersData.users.find(
-      u => (u.username === username || u.email === username)
-    );
+    const user = await db.getUserByUsername(username);
 
     if (!user) {
       // Log failed login attempt
-      logAudit('LOGIN_FAILED', 'unknown', username, {
+      await logAudit('LOGIN_FAILED', 'unknown', username, {
         reason: 'Invalid credentials'
       }, req.ip);
       return res.json({ success: false, message: 'Invalid username or password' });
@@ -1153,7 +1115,7 @@ app.post('/api/login',
 
     if (!isValidPassword) {
       // Log failed login attempt
-      logAudit('LOGIN_FAILED', user.id, user.username, {
+      await logAudit('LOGIN_FAILED', user.id, user.username, {
         reason: 'Invalid password'
       }, req.ip);
       return res.json({ success: false, message: 'Invalid username or password' });
@@ -1161,7 +1123,7 @@ app.post('/api/login',
 
     if (user.status !== 'approved') {
       // Log denied login attempt
-      logAudit('LOGIN_DENIED', user.id, user.username, {
+      await logAudit('LOGIN_DENIED', user.id, user.username, {
         reason: `Account status: ${user.status}`
       }, req.ip);
       return res.json({
@@ -1173,7 +1135,7 @@ app.post('/api/login',
     }
 
     // Log successful login
-    logAudit('USER_LOGIN', user.id, user.username, {
+    await logAudit('USER_LOGIN', user.id, user.username, {
       role: 'user',
       email: user.email,
       department: user.department
