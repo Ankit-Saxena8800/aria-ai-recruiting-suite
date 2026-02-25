@@ -1899,6 +1899,53 @@ app.post('/api/register',
     });
   });
 
+// First-time setup endpoint - Creates default admin if none exists
+app.post('/api/setup-admin', async (req, res) => {
+  try {
+    // Check if any admin exists
+    const existingAdmin = await db.getAdminByUsername('admin');
+
+    if (existingAdmin) {
+      return res.json({
+        success: false,
+        message: 'Admin account already exists. Please use login.'
+      });
+    }
+
+    // Create default admin account
+    const hashedPassword = await bcrypt.hash('aria2024', 10);
+
+    await db.sql`
+      INSERT INTO admins (
+        id, first_name, last_name, email, username, password, role
+      ) VALUES (
+        ${uuidv4()},
+        'ARIA',
+        'Admin',
+        'admin@stage.in',
+        'admin',
+        ${hashedPassword},
+        'admin'
+      )
+    `;
+
+    return res.json({
+      success: true,
+      message: 'Admin account created successfully',
+      credentials: {
+        username: 'admin',
+        password: 'aria2024'
+      }
+    });
+  } catch (error) {
+    console.error('Setup admin error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to create admin account: ' + error.message
+    });
+  }
+});
+
 // User Login
 app.post('/api/login',
   loginLimiter,
