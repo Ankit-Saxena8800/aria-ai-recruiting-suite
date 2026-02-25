@@ -1,6 +1,5 @@
 const Anthropic = require('@anthropic-ai/sdk');
 const axios = require('axios');
-const FormData = require('form-data');
 
 // Zoho Recruit API Configuration
 const ZOHO_AUTH_URL = 'https://accounts.zoho.in/oauth/v2/token';

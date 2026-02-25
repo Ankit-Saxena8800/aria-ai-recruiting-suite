@@ -21,9 +21,18 @@ require('dotenv').config();
 // Database functions
 const db = require('./db');
 
-// Zoho Recruit Automated Screening
-const { AutomatedScreeningPipeline, ZohoRecruitClient } = require('./zoho-recruit');
-const AutomatedOutreach = require('./automated-outreach');
+// Zoho Recruit Automated Screening (lazy load to prevent crashes if not configured)
+let AutomatedScreeningPipeline, ZohoRecruitClient, AutomatedOutreach;
+try {
+  const zohoModule = require('./zoho-recruit');
+  AutomatedScreeningPipeline = zohoModule.AutomatedScreeningPipeline;
+  ZohoRecruitClient = zohoModule.ZohoRecruitClient;
+  AutomatedOutreach = require('./automated-outreach');
+  console.log('✅ Automation modules loaded');
+} catch (error) {
+  console.warn('⚠️  Automation modules not available:', error.message);
+  console.warn('   Automated screening will be disabled. Configure Zoho API credentials to enable.');
+}
 
 const app = express();
 
@@ -1472,6 +1481,13 @@ app.get('/api/dashboard', (req, res) => {
 // Trigger automated screening for a specific job
 app.post('/api/automate/screen-job', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   try {
+    if (!AutomatedScreeningPipeline) {
+      return res.status(503).json({
+        success: false,
+        message: 'Automation not available. Please configure Zoho API credentials.'
+      });
+    }
+
     const { jobId, jobDescription } = req.body;
 
     if (!jobId || !jobDescription) {
@@ -1502,6 +1518,13 @@ app.post('/api/automate/screen-job', authenticateToken, requireAdmin, apiLimiter
 // Trigger automated screening for ALL open jobs
 app.post('/api/automate/screen-all-jobs', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   try {
+    if (!AutomatedScreeningPipeline) {
+      return res.status(503).json({
+        success: false,
+        message: 'Automation not available. Please configure Zoho API credentials.'
+      });
+    }
+
     const pipeline = new AutomatedScreeningPipeline(process.env.ANTHROPIC_API_KEY);
     const results = await pipeline.processAllJobs();
     const report = pipeline.generateReport(results);
@@ -1523,6 +1546,13 @@ app.post('/api/automate/screen-all-jobs', authenticateToken, requireAdmin, apiLi
 // Get all job openings from Zoho Recruit
 app.get('/api/zoho/jobs', authenticateToken, requireAdmin, async (req, res) => {
   try {
+    if (!ZohoRecruitClient) {
+      return res.status(503).json({
+        success: false,
+        message: 'Zoho integration not available. Please configure Zoho API credentials.'
+      });
+    }
+
     const zohoClient = new ZohoRecruitClient();
     const jobs = await zohoClient.getJobOpenings();
 
