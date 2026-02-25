@@ -1,10 +1,23 @@
 const { neon } = require('@neondatabase/serverless');
 
-// Initialize database connection
-const sql = neon(process.env.POSTGRES_URL);
+// Initialize database connection only if POSTGRES_URL is configured
+let sql;
+if (process.env.POSTGRES_URL) {
+  sql = neon(process.env.POSTGRES_URL);
+  console.log('✅ Database connection initialized');
+} else {
+  console.warn('⚠️  POSTGRES_URL not configured - database features will be disabled');
+  // Create mock sql function to prevent crashes
+  sql = () => Promise.resolve([]);
+}
 
 // Initialize database tables
 async function initDatabase() {
+  if (!process.env.POSTGRES_URL) {
+    console.warn('⚠️  Database initialization skipped - POSTGRES_URL not configured');
+    return;
+  }
+
   try {
     // Create users table
     await sql`
@@ -77,6 +90,10 @@ async function initDatabase() {
 
 // User operations
 async function createUser(userData) {
+  if (!process.env.POSTGRES_URL) {
+    throw new Error('Database not configured. Please set POSTGRES_URL.');
+  }
+
   const result = await sql`
     INSERT INTO users (
       id, first_name, last_name, email, username, password,

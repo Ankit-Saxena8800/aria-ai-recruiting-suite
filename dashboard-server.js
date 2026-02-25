@@ -18,8 +18,22 @@ const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
-// Database functions
-const db = require('./db');
+// Database functions (lazy load to prevent crashes if not configured)
+let db;
+try {
+  db = require('./db');
+  console.log('✅ Database module loaded');
+} catch (error) {
+  console.warn('⚠️  Database module not available:', error.message);
+  console.warn('   User management will be disabled. Configure POSTGRES_URL to enable.');
+  // Create mock db object to prevent crashes
+  db = {
+    initDatabase: async () => {},
+    createUser: async () => { throw new Error('Database not configured'); },
+    getUserByUsername: async () => null,
+    getAllUsers: async () => []
+  };
+}
 
 // Zoho Recruit Automated Screening (lazy load to prevent crashes if not configured)
 let AutomatedScreeningPipeline, ZohoRecruitClient, AutomatedOutreach;
