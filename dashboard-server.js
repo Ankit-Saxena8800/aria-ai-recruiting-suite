@@ -21,6 +21,10 @@ require('dotenv').config();
 // Database functions
 const db = require('./db');
 
+// Zoho Recruit Automated Screening
+const { AutomatedScreeningPipeline, ZohoRecruitClient } = require('./zoho-recruit');
+const AutomatedOutreach = require('./automated-outreach');
+
 const app = express();
 
 // Initialize database tables on startup
@@ -1459,6 +1463,170 @@ app.get('/api/dashboard', (req, res) => {
     data: sampleData,
     lastUpdated: new Date().toISOString()
   });
+});
+
+// ============================================================================
+// AUTOMATED CANDIDATE SCREENING ENDPOINTS
+// ============================================================================
+
+// Trigger automated screening for a specific job
+app.post('/api/automate/screen-job', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
+  try {
+    const { jobId, jobDescription } = req.body;
+
+    if (!jobId || !jobDescription) {
+      return res.json({ success: false, message: 'Job ID and description required' });
+    }
+
+    const pipeline = new AutomatedScreeningPipeline(process.env.ANTHROPIC_API_KEY);
+    const results = await pipeline.processJobCandidates(jobId, jobDescription);
+
+    res.json({
+      success: true,
+      message: `Screened ${results.processed} candidates`,
+      results: {
+        processed: results.processed,
+        topCandidates: results.topCandidates.length,
+        topCandidatesList: results.topCandidates
+      }
+    });
+  } catch (error) {
+    console.error('Automated screening error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Automated screening failed'
+    });
+  }
+});
+
+// Trigger automated screening for ALL open jobs
+app.post('/api/automate/screen-all-jobs', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
+  try {
+    const pipeline = new AutomatedScreeningPipeline(process.env.ANTHROPIC_API_KEY);
+    const results = await pipeline.processAllJobs();
+    const report = pipeline.generateReport(results);
+
+    res.json({
+      success: true,
+      message: `Automated screening complete!`,
+      report
+    });
+  } catch (error) {
+    console.error('Automated screening error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Automated screening failed'
+    });
+  }
+});
+
+// Get all job openings from Zoho Recruit
+app.get('/api/zoho/jobs', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const zohoClient = new ZohoRecruitClient();
+    const jobs = await zohoClient.getJobOpenings();
+
+    res.json({
+      success: true,
+      jobs
+    });
+  } catch (error) {
+    console.error('Zoho jobs fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch jobs from Zoho Recruit'
+    });
+  }
+});
+
+// Get candidates for a specific job from Zoho
+app.get('/api/zoho/job/:jobId/candidates', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const zohoClient = new ZohoRecruitClient();
+    const candidates = await zohoClient.getCandidatesForJob(jobId);
+
+    res.json({
+      success: true,
+      candidates
+    });
+  } catch (error) {
+    console.error('Zoho candidates fetch error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch candidates from Zoho Recruit'
+    });
+  }
+});
+
+// Test Zoho API connection
+app.get('/api/zoho/test-connection', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const zohoClient = new ZohoRecruitClient();
+    await zohoClient.getAccessToken();
+
+    res.json({
+      success: true,
+      message: '✅ Zoho Recruit API connection successful!',
+      configured: !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_REFRESH_TOKEN)
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+      configured: !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_REFRESH_TOKEN)
+    });
+  }
+});
+
+// Contact top candidates with automated outreach
+app.post('/api/automate/contact-candidates', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
+  try {
+    const { candidates, jobTitle } = req.body;
+
+    if (!candidates || !Array.isArray(candidates) || candidates.length === 0) {
+      return res.json({ success: false, message: 'No candidates provided' });
+    }
+
+    const outreach = new AutomatedOutreach();
+    const results = await outreach.contactTopCandidates(candidates, jobTitle);
+
+    res.json({
+      success: true,
+      message: `Contacted ${results.contacted}/${results.totalCandidates} candidates`,
+      results
+    });
+  } catch (error) {
+    console.error('Automated outreach error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Automated outreach failed'
+    });
+  }
+});
+
+// Generate call list for manual outreach
+app.post('/api/automate/generate-call-list', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { candidates } = req.body;
+
+    if (!candidates || !Array.isArray(candidates)) {
+      return res.json({ success: false, message: 'No candidates provided' });
+    }
+
+    const outreach = new AutomatedOutreach();
+    const callList = outreach.generateCallList(candidates);
+
+    res.json({
+      success: true,
+      callList
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to generate call list'
+    });
+  }
 });
 
 // Health check
