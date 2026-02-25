@@ -28,9 +28,11 @@ try {
   console.warn('   User management will be disabled. Configure POSTGRES_URL to enable.');
   // Create mock db object to prevent crashes
   db = {
+    sql: () => Promise.resolve([]),
     initDatabase: async () => {},
     createUser: async () => { throw new Error('Database not configured'); },
     getUserByUsername: async () => null,
+    getAdminByUsername: async () => null,
     getAllUsers: async () => []
   };
 }
