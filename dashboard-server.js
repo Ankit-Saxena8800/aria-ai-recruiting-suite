@@ -16,6 +16,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
+const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 
 // Database functions (lazy load to prevent crashes if not configured)
