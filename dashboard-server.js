@@ -53,10 +53,12 @@ try {
 
 const app = express();
 
-// Initialize database tables on startup
-db.initDatabase().catch(err => {
-  console.error('Failed to initialize database:', err);
-});
+// Initialize database tables on startup (non-blocking)
+if (db && db.initDatabase) {
+  db.initDatabase().catch(err => {
+    console.error('⚠️  Failed to initialize database:', err.message);
+  });
+}
 
 // ============================================================================
 // SECURITY MIDDLEWARE
