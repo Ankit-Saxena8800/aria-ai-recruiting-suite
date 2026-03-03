@@ -1712,9 +1712,39 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 // Helper functions for user management (now using database)
+function mapDbUser(u) {
+  return {
+    id: u.id,
+    firstName: u.first_name,
+    lastName: u.last_name,
+    email: u.email,
+    username: u.username,
+    department: u.department,
+    status: u.status,
+    role: u.role,
+    ssoProvider: u.sso_provider,
+    requestedAt: u.requested_at,
+    updatedAt: u.updated_at,
+    deletedAt: u.deleted_at
+  };
+}
+
+function mapDbBlacklistEntry(b) {
+  return {
+    id: b.id,
+    email: b.email,
+    username: b.username,
+    firstName: b.first_name,
+    lastName: b.last_name,
+    reason: b.reason,
+    blacklistedAt: b.blacklisted_at,
+    originalUserId: b.original_user_id
+  };
+}
+
 async function readUsersFile() {
   // Kept for backward compatibility - returns data in old format
-  const users = await db.getAllUsers();
+  const users = (await db.getAllUsers()).map(mapDbUser);
   return { users, admins: [], blacklist: [] };
 }
 
@@ -2283,8 +2313,8 @@ app.get('/api/audit-logs/all', authenticateToken, requireAdmin, apiLimiter, (req
 });
 
 // Get all users (Admin only)
-app.get('/api/admin/users', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
-  const usersData = readUsersFile();
+app.get('/api/admin/users', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
+  const usersData = await readUsersFile();
   res.json({
     success: true,
     users: usersData.users
@@ -2292,191 +2322,167 @@ app.get('/api/admin/users', authenticateToken, requireAdmin, apiLimiter, (req, r
 });
 
 // Update user status (Admin only)
-app.post('/api/admin/update-status', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
+app.post('/api/admin/update-status', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   const { userId, status } = req.body;
 
   if (!['pending', 'approved', 'rejected'].includes(status)) {
     return res.json({ success: false, message: 'Invalid status' });
   }
 
-  const usersData = readUsersFile();
-  const userIndex = usersData.users.findIndex(u => u.id === userId);
+  try {
+    const dbUser = await db.getUserById(userId);
+    if (!dbUser) {
+      return res.json({ success: false, message: 'User not found' });
+    }
 
-  if (userIndex === -1) {
-    return res.json({ success: false, message: 'User not found' });
+    const oldStatus = dbUser.status;
+    await db.updateUserStatus(userId, status);
+    const user = mapDbUser(dbUser);
+
+    // Log audit
+    logAudit('USER_STATUS_CHANGED', user.id, user.username, {
+      oldStatus,
+      newStatus: status,
+      changedBy: 'admin',
+      email: user.email
+    }, req.ip);
+
+    // Send email notification based on status change
+    if (status === 'approved') {
+      sendApprovalEmail(user).catch(err => console.error('Approval email error:', err));
+    } else if (status === 'rejected') {
+      sendRejectionEmail(user).catch(err => console.error('Rejection email error:', err));
+    }
+
+    res.json({ success: true, message: `User ${status} successfully` });
+  } catch (error) {
+    console.error('Update status error:', error);
+    res.json({ success: false, message: 'Failed to update user status' });
   }
-
-  const user = usersData.users[userIndex];
-  const oldStatus = user.status;
-  user.status = status;
-  user.updatedAt = new Date().toISOString();
-
-  writeUsersFile(usersData);
-
-  // Log audit
-  logAudit('USER_STATUS_CHANGED', user.id, user.username, {
-    oldStatus,
-    newStatus: status,
-    changedBy: 'admin',
-    email: user.email
-  }, req.ip);
-
-  // Send email notification based on status change
-  if (status === 'approved') {
-    sendApprovalEmail(user).catch(err => console.error('Approval email error:', err));
-  } else if (status === 'rejected') {
-    sendRejectionEmail(user).catch(err => console.error('Rejection email error:', err));
-  }
-
-  res.json({
-    success: true,
-    message: `User ${status} successfully`
-  });
 });
 
 // Hard Delete user - Permanently removes (Admin only)
-app.post('/api/admin/delete-user', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
+app.post('/api/admin/delete-user', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
     return res.json({ success: false, message: 'User ID is required' });
   }
 
-  const usersData = readUsersFile();
-  const userIndex = usersData.users.findIndex(u => u.id === userId);
+  try {
+    const dbUser = await db.getUserById(userId);
+    if (!dbUser) {
+      return res.json({ success: false, message: 'User not found' });
+    }
 
-  if (userIndex === -1) {
-    return res.json({ success: false, message: 'User not found' });
+    await db.deleteUser(userId);
+
+    res.json({
+      success: true,
+      message: `User ${dbUser.username} permanently deleted (can re-register)`
+    });
+  } catch (error) {
+    console.error('Delete user error:', error);
+    res.json({ success: false, message: 'Failed to delete user' });
   }
-
-  // Remove user from array (can re-register)
-  const deletedUser = usersData.users[userIndex];
-  usersData.users.splice(userIndex, 1);
-
-  writeUsersFile(usersData);
-
-  res.json({
-    success: true,
-    message: `User ${deletedUser.username} permanently deleted (can re-register)`
-  });
 });
 
 // Soft Delete user - Mark as deleted but keep record (Admin only)
-app.post('/api/admin/soft-delete-user', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
+app.post('/api/admin/soft-delete-user', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
     return res.json({ success: false, message: 'User ID is required' });
   }
 
-  const usersData = readUsersFile();
-  const userIndex = usersData.users.findIndex(u => u.id === userId);
+  try {
+    const dbUser = await db.getUserById(userId);
+    if (!dbUser) {
+      return res.json({ success: false, message: 'User not found' });
+    }
 
-  if (userIndex === -1) {
-    return res.json({ success: false, message: 'User not found' });
+    await db.softDeleteUser(userId);
+
+    res.json({
+      success: true,
+      message: `User ${dbUser.username} soft deleted (cannot re-register with same email)`
+    });
+  } catch (error) {
+    console.error('Soft delete error:', error);
+    res.json({ success: false, message: 'Failed to soft delete user' });
   }
-
-  // Mark as deleted (keeps history, blocks re-registration)
-  usersData.users[userIndex].status = 'deleted';
-  usersData.users[userIndex].deletedAt = new Date().toISOString();
-
-  writeUsersFile(usersData);
-
-  res.json({
-    success: true,
-    message: `User ${usersData.users[userIndex].username} soft deleted (cannot re-register with same email)`
-  });
 });
 
 // Blacklist user - Permanently block email/username (Admin only)
-app.post('/api/admin/blacklist-user', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
+app.post('/api/admin/blacklist-user', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   const { userId } = req.body;
 
   if (!userId) {
     return res.json({ success: false, message: 'User ID is required' });
   }
 
-  const usersData = readUsersFile();
-  const user = usersData.users.find(u => u.id === userId);
+  try {
+    const dbUser = await db.getUserById(userId);
+    if (!dbUser) {
+      return res.json({ success: false, message: 'User not found' });
+    }
 
-  if (!user) {
-    return res.json({ success: false, message: 'User not found' });
+    const alreadyBlacklisted = await db.isBlacklisted(dbUser.email, dbUser.username);
+    if (alreadyBlacklisted) {
+      return res.json({ success: false, message: 'User is already blacklisted' });
+    }
+
+    await db.addToBlacklist({
+      id: `blacklist_${Date.now()}`,
+      email: dbUser.email,
+      username: dbUser.username,
+      firstName: dbUser.first_name,
+      lastName: dbUser.last_name,
+      reason: 'Blacklisted by admin',
+      originalUserId: userId
+    });
+
+    await db.deleteUser(userId);
+
+    res.json({
+      success: true,
+      message: `User ${dbUser.username} blacklisted (permanently blocked from registration)`
+    });
+  } catch (error) {
+    console.error('Blacklist error:', error);
+    res.json({ success: false, message: 'Failed to blacklist user' });
   }
-
-  // Initialize blacklist if it doesn't exist
-  if (!usersData.blacklist) {
-    usersData.blacklist = [];
-  }
-
-  // Check if already blacklisted
-  const alreadyBlacklisted = usersData.blacklist.some(
-    b => b.email === user.email || b.username === user.username
-  );
-
-  if (alreadyBlacklisted) {
-    return res.json({ success: false, message: 'User is already blacklisted' });
-  }
-
-  // Add to blacklist
-  usersData.blacklist.push({
-    id: `blacklist_${Date.now()}`,
-    email: user.email,
-    username: user.username,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    reason: 'Blacklisted by admin',
-    blacklistedAt: new Date().toISOString(),
-    originalUserId: userId
-  });
-
-  // Remove from users array
-  const userIndex = usersData.users.findIndex(u => u.id === userId);
-  usersData.users.splice(userIndex, 1);
-
-  writeUsersFile(usersData);
-
-  res.json({
-    success: true,
-    message: `User ${user.username} blacklisted (permanently blocked from registration)`
-  });
 });
 
 // Get blacklist (Admin only)
-app.get('/api/admin/blacklist', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
-  const usersData = readUsersFile();
-  res.json({
-    success: true,
-    blacklist: usersData.blacklist || []
-  });
+app.get('/api/admin/blacklist', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
+  try {
+    const blacklist = (await db.getBlacklist()).map(mapDbBlacklistEntry);
+    res.json({ success: true, blacklist });
+  } catch (error) {
+    console.error('Get blacklist error:', error);
+    res.json({ success: true, blacklist: [] });
+  }
 });
 
 // Remove from blacklist (Admin only)
-app.post('/api/admin/unblacklist', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
+app.post('/api/admin/unblacklist', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
   const { blacklistId } = req.body;
 
   if (!blacklistId) {
     return res.json({ success: false, message: 'Blacklist ID is required' });
   }
 
-  const usersData = readUsersFile();
-
-  if (!usersData.blacklist) {
-    return res.json({ success: false, message: 'No blacklist found' });
+  try {
+    const removed = await db.removeFromBlacklist(blacklistId);
+    if (!removed) {
+      return res.json({ success: false, message: 'Entry not found in blacklist' });
+    }
+    res.json({ success: true, message: 'User removed from blacklist' });
+  } catch (error) {
+    console.error('Unblacklist error:', error);
+    res.json({ success: false, message: 'Failed to remove from blacklist' });
   }
-
-  const index = usersData.blacklist.findIndex(b => b.id === blacklistId);
-
-  if (index === -1) {
-    return res.json({ success: false, message: 'Entry not found in blacklist' });
-  }
-
-  usersData.blacklist.splice(index, 1);
-  writeUsersFile(usersData);
-
-  res.json({
-    success: true,
-    message: 'User removed from blacklist'
-  });
 });
 
 // ============================================
