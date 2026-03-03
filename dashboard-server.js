@@ -1610,21 +1610,22 @@ app.get('/api/zoho/job/:jobId/candidates', authenticateToken, requireAdmin, asyn
 
 // Test Zoho API connection
 app.get('/api/zoho/test-connection', authenticateToken, requireAdmin, async (req, res) => {
+  const configured = !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_REFRESH_TOKEN);
+
+  if (!ZohoRecruitClient || !configured) {
+    return res.status(503).json({
+      success: false,
+      configured,
+      message: 'Zoho credentials not configured. Set ZOHO_CLIENT_ID, ZOHO_CLIENT_SECRET, ZOHO_REFRESH_TOKEN in Vercel environment variables.'
+    });
+  }
+
   try {
     const zohoClient = new ZohoRecruitClient();
     await zohoClient.getAccessToken();
-
-    res.json({
-      success: true,
-      message: '✅ Zoho Recruit API connection successful!',
-      configured: !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_REFRESH_TOKEN)
-    });
+    res.json({ success: true, configured, message: '✅ Zoho Recruit API connection successful!' });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-      configured: !!(process.env.ZOHO_CLIENT_ID && process.env.ZOHO_CLIENT_SECRET && process.env.ZOHO_REFRESH_TOKEN)
-    });
+    res.status(500).json({ success: false, configured, message: error.message });
   }
 });
 
