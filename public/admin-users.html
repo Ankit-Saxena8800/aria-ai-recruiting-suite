@@ -489,9 +489,27 @@
             window.location.href = '/login.html';
         }
 
+        // Auth-aware fetch wrapper — attaches Bearer token to every request
+        function authFetch(url, options = {}) {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return Promise.reject(new Error('No auth token'));
+            }
+            const headers = {
+                ...(options.headers || {}),
+                'Authorization': `Bearer ${token}`
+            };
+            return fetch(url, { ...options, headers });
+        }
+
         async function loadUsers() {
             try {
-                const response = await fetch('/api/admin/users');
+                const response = await authFetch('/api/admin/users');
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '/login.html';
+                    return;
+                }
                 const data = await response.json();
 
                 if (data.success) {
@@ -499,10 +517,11 @@
                     updateStats();
                     displayUsers();
                 } else {
-                    console.error('Failed to load users');
+                    document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Failed to load users</p></div></td></tr>`;
                 }
             } catch (error) {
                 console.error('Error loading users:', error);
+                document.getElementById('usersTableBody').innerHTML = `<tr><td colspan="8"><div class="empty-state"><p>Error loading users</p></div></td></tr>`;
             }
         }
 
@@ -645,11 +664,9 @@
 
         async function updateUserStatus(userId, status) {
             try {
-                const response = await fetch('/api/admin/update-status', {
+                const response = await authFetch('/api/admin/update-status', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId, status }),
                 });
 
@@ -672,7 +689,7 @@
             if (!confirmed) return;
 
             try {
-                const response = await fetch('/api/admin/delete-user', {
+                const response = await authFetch('/api/admin/delete-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId }),
@@ -696,7 +713,7 @@
             if (!confirmed) return;
 
             try {
-                const response = await fetch('/api/admin/soft-delete-user', {
+                const response = await authFetch('/api/admin/soft-delete-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId }),
@@ -720,7 +737,7 @@
             if (!confirmed) return;
 
             try {
-                const response = await fetch('/api/admin/blacklist-user', {
+                const response = await authFetch('/api/admin/blacklist-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId }),
@@ -741,7 +758,7 @@
 
         async function displayBlacklist() {
             try {
-                const response = await fetch('/api/admin/blacklist');
+                const response = await authFetch('/api/admin/blacklist');
                 const data = await response.json();
 
                 const tbody = document.getElementById('usersTableBody');
@@ -784,7 +801,7 @@
             if (!confirmed) return;
 
             try {
-                const response = await fetch('/api/admin/unblacklist', {
+                const response = await authFetch('/api/admin/unblacklist', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ blacklistId }),
@@ -863,7 +880,7 @@
 
             for (const userId of selectedIds) {
                 try {
-                    const response = await fetch('/api/admin/update-status', {
+                    const response = await authFetch('/api/admin/update-status', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId, status: 'approved' })
@@ -909,7 +926,7 @@
 
             for (const userId of selectedIds) {
                 try {
-                    const response = await fetch('/api/admin/update-status', {
+                    const response = await authFetch('/api/admin/update-status', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId, status: 'rejected' })
