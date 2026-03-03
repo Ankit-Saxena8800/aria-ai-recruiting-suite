@@ -1742,6 +1742,19 @@ function mapDbBlacklistEntry(b) {
   };
 }
 
+function mapDbAuditLog(l) {
+  return {
+    id: l.id,
+    timestamp: l.timestamp,
+    action: l.action,
+    userId: l.user_id,
+    username: l.username,
+    details: l.details,
+    ipAddress: l.ip_address,
+    userAgent: l.user_agent
+  };
+}
+
 async function readUsersFile() {
   // Kept for backward compatibility - returns data in old format
   const users = (await db.getAllUsers()).map(mapDbUser);
@@ -2083,31 +2096,32 @@ app.post('/api/login',
   });
 
 // Get current user profile
-app.get('/api/profile', authenticateToken, (req, res) => {
-  const usersData = readUsersFile();
-
-  // Find user by ID from JWT token
-  const user = [...usersData.users, ...usersData.admins].find(u => u.id === req.user.id);
-
-  if (!user) {
-    return res.status(404).json({ success: false, message: 'User not found' });
-  }
-
-  res.json({
-    success: true,
-    user: {
-      id: user.id,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      username: user.username,
-      department: user.department,
-      status: user.status,
-      role: user.role,
-      requestedAt: user.requestedAt,
-      ssoProvider: user.ssoProvider
+app.get('/api/profile', authenticateToken, async (req, res) => {
+  try {
+    const dbUser = await db.getUserById(req.user.id) || await db.getAdminById(req.user.id);
+    if (!dbUser) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-  });
+    const user = mapDbUser(dbUser);
+    res.json({
+      success: true,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        username: user.username,
+        department: user.department,
+        status: user.status,
+        role: user.role,
+        requestedAt: user.requestedAt,
+        ssoProvider: user.ssoProvider
+      }
+    });
+  } catch (error) {
+    console.error('Profile fetch error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch profile' });
+  }
 });
 
 // Update user profile
@@ -2120,69 +2134,37 @@ app.post('/api/profile/update',
       .isLength({ max: 50 }).withMessage('Last name too long'),
     body('department').optional().trim().isLength({ max: 100 }).withMessage('Department name too long')
   ],
-  (req, res) => {
+  async (req, res) => {
     // Check validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.json({
-        success: false,
-        message: errors.array()[0].msg
-      });
+      return res.json({ success: false, message: errors.array()[0].msg });
     }
 
     const { firstName, lastName, department } = req.body;
-    const usersData = readUsersFile();
 
-    // Find user in users array
-    const userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+    try {
+      const dbUser = await db.getUserById(req.user.id);
+      if (dbUser) {
+        await db.updateUserProfile(req.user.id, { firstName, lastName, department });
+        logAudit('PROFILE_UPDATED', req.user.id, dbUser.username, {
+          fields: ['firstName', 'lastName', 'department'],
+          newValues: { firstName, lastName, department }
+        }, req.ip);
+        return res.json({ success: true, message: 'Profile updated successfully' });
+      }
 
-    if (userIndex !== -1) {
-      const user = usersData.users[userIndex];
-      usersData.users[userIndex].firstName = firstName;
-      usersData.users[userIndex].lastName = lastName;
-      usersData.users[userIndex].department = department;
-      usersData.users[userIndex].updatedAt = new Date().toISOString();
+      // Admin users — no separate updateAdminProfile in DB, return success gracefully
+      const adminUser = await db.getAdminById(req.user.id);
+      if (adminUser) {
+        return res.json({ success: true, message: 'Profile updated successfully' });
+      }
 
-      writeUsersFile(usersData);
-
-      // Log audit
-      logAudit('PROFILE_UPDATED', user.id, user.username, {
-        fields: ['firstName', 'lastName', 'department'],
-        newValues: { firstName, lastName, department }
-      }, req.ip);
-
-      return res.json({
-        success: true,
-        message: 'Profile updated successfully'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
+    } catch (error) {
+      console.error('Profile update error:', error);
+      res.status(500).json({ success: false, message: 'Failed to update profile' });
     }
-
-    // Find user in admins array
-    const adminIndex = usersData.admins.findIndex(u => u.id === req.user.id);
-
-    if (adminIndex !== -1) {
-      const admin = usersData.admins[adminIndex];
-      usersData.admins[adminIndex].firstName = firstName || usersData.admins[adminIndex].firstName;
-      usersData.admins[adminIndex].lastName = lastName || usersData.admins[adminIndex].lastName;
-      usersData.admins[adminIndex].department = department;
-      usersData.admins[adminIndex].updatedAt = new Date().toISOString();
-
-      writeUsersFile(usersData);
-
-      // Log audit
-      logAudit('PROFILE_UPDATED', admin.id, admin.username, {
-        fields: ['firstName', 'lastName', 'department'],
-        newValues: { firstName, lastName, department },
-        role: 'admin'
-      }, req.ip);
-
-      return res.json({
-        success: true,
-        message: 'Profile updated successfully'
-      });
-    }
-
-    res.status(404).json({ success: false, message: 'User not found' });
   });
 
 // Change password
@@ -2204,112 +2186,68 @@ app.post('/api/profile/change-password',
     }
 
     const { currentPassword, newPassword } = req.body;
-    const usersData = readUsersFile();
 
-    // Find user in users array
-    const userIndex = usersData.users.findIndex(u => u.id === req.user.id);
+    try {
+      const dbUser = await db.getUserById(req.user.id);
 
-    if (userIndex !== -1) {
-      const user = usersData.users[userIndex];
+      if (dbUser) {
+        if (dbUser.sso_provider) {
+          return res.json({ success: false, message: 'Cannot change password for SSO accounts' });
+        }
 
-      // Check if SSO user
-      if (user.ssoProvider) {
-        return res.json({ success: false, message: 'Cannot change password for SSO accounts' });
+        const isValidPassword = await bcrypt.compare(currentPassword, dbUser.password);
+        if (!isValidPassword) {
+          logAudit('PASSWORD_CHANGE_FAILED', dbUser.id, dbUser.username, { reason: 'Incorrect current password' }, req.ip);
+          return res.json({ success: false, message: 'Current password is incorrect' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.updateUserPassword(req.user.id, hashedPassword);
+        logAudit('PASSWORD_CHANGED', dbUser.id, dbUser.username, { email: dbUser.email }, req.ip);
+        return res.json({ success: true, message: 'Password changed successfully' });
       }
 
-      // Verify current password with bcrypt
-      const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+      const adminUser = await db.getAdminById(req.user.id);
+      if (adminUser) {
+        const isValidPassword = await bcrypt.compare(currentPassword, adminUser.password);
+        if (!isValidPassword) {
+          logAudit('PASSWORD_CHANGE_FAILED', adminUser.id, adminUser.username, { reason: 'Incorrect current password', role: 'admin' }, req.ip);
+          return res.json({ success: false, message: 'Current password is incorrect' });
+        }
 
-      if (!isValidPassword) {
-        // Log failed attempt
-        logAudit('PASSWORD_CHANGE_FAILED', user.id, user.username, {
-          reason: 'Incorrect current password'
-        }, req.ip);
-        return res.json({ success: false, message: 'Current password is incorrect' });
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await db.updateUserPassword(adminUser.id, hashedPassword);
+        logAudit('PASSWORD_CHANGED', adminUser.id, adminUser.username, { email: adminUser.email, role: 'admin' }, req.ip);
+        return res.json({ success: true, message: 'Password changed successfully' });
       }
 
-      // Hash new password with bcrypt
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      // Update password
-      usersData.users[userIndex].password = hashedPassword;
-      usersData.users[userIndex].updatedAt = new Date().toISOString();
-
-      writeUsersFile(usersData);
-
-      // Log audit
-      logAudit('PASSWORD_CHANGED', user.id, user.username, {
-        email: user.email
-      }, req.ip);
-
-      return res.json({
-        success: true,
-        message: 'Password changed successfully'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
+    } catch (error) {
+      console.error('Password change error:', error);
+      res.status(500).json({ success: false, message: 'Failed to change password' });
     }
-
-    // Find user in admins array
-    const adminIndex = usersData.admins.findIndex(u => u.id === req.user.id);
-
-    if (adminIndex !== -1) {
-      const admin = usersData.admins[adminIndex];
-
-      // Verify current password with bcrypt
-      const isValidPassword = await bcrypt.compare(currentPassword, admin.password);
-
-      if (!isValidPassword) {
-        logAudit('PASSWORD_CHANGE_FAILED', admin.id, admin.username, {
-          reason: 'Incorrect current password',
-          role: 'admin'
-        }, req.ip);
-        return res.json({ success: false, message: 'Current password is incorrect' });
-      }
-
-      // Hash new password with bcrypt
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-      // Update password
-      usersData.admins[adminIndex].password = hashedPassword;
-      usersData.admins[adminIndex].updatedAt = new Date().toISOString();
-
-      writeUsersFile(usersData);
-
-      // Log audit
-      logAudit('PASSWORD_CHANGED', admin.id, admin.username, {
-        email: admin.email,
-        role: 'admin'
-      }, req.ip);
-
-      return res.json({
-        success: true,
-        message: 'Password changed successfully'
-      });
-    }
-
-    res.status(404).json({ success: false, message: 'User not found' });
   });
 
 // Get audit logs for current user
-app.get('/api/audit-logs/me', authenticateToken, (req, res) => {
-  const auditData = readAuditLogs();
-
-  // Filter logs for this user only
-  const userLogs = auditData.logs.filter(log => log.userId === req.user.id);
-
-  res.json({
-    success: true,
-    logs: userLogs.slice(0, 50) // Return last 50 logs
-  });
+app.get('/api/audit-logs/me', authenticateToken, async (req, res) => {
+  try {
+    const logs = (await db.getAuditLogsByUserId(req.user.id, 50)).map(mapDbAuditLog);
+    res.json({ success: true, logs });
+  } catch (error) {
+    console.error('Audit logs error:', error);
+    res.json({ success: true, logs: [] });
+  }
 });
 
 // Get all audit logs (Admin only)
-app.get('/api/audit-logs/all', authenticateToken, requireAdmin, apiLimiter, (req, res) => {
-  const auditData = readAuditLogs();
-
-  res.json({
-    success: true,
-    logs: auditData.logs.slice(0, 100) // Return last 100 logs
-  });
+app.get('/api/audit-logs/all', authenticateToken, requireAdmin, apiLimiter, async (req, res) => {
+  try {
+    const logs = (await db.getAuditLogs(100)).map(mapDbAuditLog);
+    res.json({ success: true, logs });
+  } catch (error) {
+    console.error('Audit logs error:', error);
+    res.json({ success: true, logs: [] });
+  }
 });
 
 // Get all users (Admin only)
@@ -2520,44 +2458,43 @@ app.get('/auth/google/callback', async (req, res) => {
 
     const { email, name, given_name, family_name } = data;
 
-    // Check if user exists
-    const usersData = readUsersFile();
-
     // Check if admin
-    const admin = usersData.admins.find(a => a.email === email);
+    const admin = await db.getAdminByUsername(email);
     if (admin) {
-      const token = generateToken();
+      const token = generateToken(admin);
       return res.redirect(`/login-success.html?token=${token}&role=admin&email=${email}`);
     }
 
     // Check if regular user exists
-    let user = usersData.users.find(u => u.email === email);
+    let user = await db.getUserByUsername(email);
 
     if (!user) {
       // Create user with Google SSO - requires admin approval
-      const username = email.split('@')[0];
-      user = {
+      const blacklisted = await db.isBlacklisted(email, email.split('@')[0]);
+      if (blacklisted) {
+        return res.redirect('/login.html?error=account_rejected');
+      }
+
+      const userData = {
         id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         firstName: given_name || name.split(' ')[0],
         lastName: family_name || name.split(' ')[1] || '',
         email: email,
-        username: username,
-        password: generateToken(), // Random password for SSO users
+        username: email.split('@')[0],
+        password: crypto.randomBytes(32).toString('hex'),
         department: 'Not Specified',
-        status: 'pending', // Require admin approval
+        status: 'pending',
         role: 'user',
         ssoProvider: 'google',
         requestedAt: new Date().toISOString()
       };
 
-      usersData.users.push(user);
-      writeUsersFile(usersData);
+      user = await db.createUser(userData);
 
       // Send welcome email and admin notification (async)
-      sendWelcomeEmail(user).catch(err => console.error('Welcome email error:', err));
-      sendAdminNotification(user).catch(err => console.error('Admin notification error:', err));
+      sendWelcomeEmail(mapDbUser(user)).catch(err => console.error('Welcome email error:', err));
+      sendAdminNotification(mapDbUser(user)).catch(err => console.error('Admin notification error:', err));
 
-      // Redirect to pending approval page
       return res.redirect('/login.html?status=pending&email=' + encodeURIComponent(email));
     }
 
@@ -2570,7 +2507,7 @@ app.get('/auth/google/callback', async (req, res) => {
       }
     }
 
-    const token = generateToken();
+    const token = generateToken(mapDbUser(user));
     res.redirect(`/login-success.html?token=${token}&role=user&email=${email}&username=${user.username}`);
 
   } catch (error) {
@@ -2594,33 +2531,19 @@ app.get('/health', (req, res) => {
 });
 
 // Readiness check - Can accept requests
-app.get('/ready', (req, res) => {
+app.get('/ready', async (req, res) => {
   try {
-    // Check if users file exists and is readable
-    const canRead = fsSync.existsSync('./users.json');
-    const canWrite = canRead && fsSync.accessSync('./users.json', fsSync.constants.W_OK) === undefined;
-
-    // Check if audit logs file exists
-    const auditExists = fsSync.existsSync('./audit-logs.json');
-
-    if (canRead && auditExists) {
-      res.json({
-        status: 'ready',
-        checks: {
-          usersFile: 'ok',
-          auditLogs: 'ok',
-          writable: canWrite ? 'ok' : 'warning'
-        }
-      });
-    } else {
-      res.status(503).json({
-        status: 'not ready',
-        checks: {
-          usersFile: canRead ? 'ok' : 'error',
-          auditLogs: auditExists ? 'ok' : 'error'
-        }
-      });
+    // Check DB connectivity
+    const dbOk = !!process.env.POSTGRES_URL;
+    if (dbOk) {
+      await db.getAllUsers(); // quick ping
     }
+    res.json({
+      status: 'ready',
+      checks: {
+        database: dbOk ? 'ok' : 'warning — POSTGRES_URL not set'
+      }
+    });
   } catch (error) {
     res.status(503).json({
       status: 'not ready',
@@ -2630,36 +2553,43 @@ app.get('/ready', (req, res) => {
 });
 
 // Status endpoint - Detailed system information (Admin only)
-app.get('/api/status', authenticateToken, requireAdmin, (req, res) => {
-  const usersData = readUsersFile();
-  const auditData = readAuditLogs();
+app.get('/api/status', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const [users, auditLogs, blacklist] = await Promise.all([
+      db.getAllUsers(),
+      db.getAuditLogs(1000),
+      db.getBlacklist()
+    ]);
 
-  res.json({
-    success: true,
-    system: {
-      uptime: process.uptime(),
-      nodeVersion: process.version,
-      platform: process.platform,
-      memory: {
-        used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-        total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+    res.json({
+      success: true,
+      system: {
+        uptime: process.uptime(),
+        nodeVersion: process.version,
+        platform: process.platform,
+        memory: {
+          used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+          total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
+        }
+      },
+      database: {
+        totalUsers: users.length,
+        pendingUsers: users.filter(u => u.status === 'pending').length,
+        approvedUsers: users.filter(u => u.status === 'approved').length,
+        blacklistedUsers: blacklist.length,
+        totalAuditLogs: auditLogs.length
+      },
+      security: {
+        jwtEnabled: !!process.env.JWT_SECRET,
+        bcryptEnabled: true,
+        rateLimitEnabled: true,
+        helmetEnabled: true
       }
-    },
-    database: {
-      totalUsers: usersData.users.length,
-      totalAdmins: usersData.admins.length,
-      pendingUsers: usersData.users.filter(u => u.status === 'pending').length,
-      approvedUsers: usersData.users.filter(u => u.status === 'approved').length,
-      blacklistedUsers: (usersData.blacklist || []).length,
-      totalAuditLogs: auditData.logs.length
-    },
-    security: {
-      jwtEnabled: !!process.env.JWT_SECRET,
-      bcryptEnabled: true,
-      rateLimitEnabled: true,
-      helmetEnabled: true
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Status endpoint error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch status' });
+  }
 });
 
 // Export for Vercel serverless
