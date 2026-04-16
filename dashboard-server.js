@@ -8,7 +8,7 @@ const fs = require('fs').promises;
 const fsSync = require('fs');
 const crypto = require('crypto');
 const { calculateMetrics } = require('./hiring-dashboard');
-const Anthropic = require('@anthropic-ai/sdk');
+// NeoRouter (OpenAI-compatible) — drop-in for @anthropic-ai/sdk
 const { google } = require('googleapis');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
@@ -204,10 +204,29 @@ async function sendAdminNotification(user) {
 }
 const PORT = process.env.DASHBOARD_PORT || 3001;
 
-// Initialize Claude AI
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
-});
+// Initialize AI via NeoRouter (OpenAI-compatible proxy)
+const _NEOROUTER_BASE = process.env.NEOROUTER_BASE_URL || 'http://neorouter.stage.in/v1';
+const _NEOROUTER_KEY = process.env.NEOROUTER_API_KEY || process.env.ANTHROPIC_API_KEY;
+const _LLM_MODEL = process.env.AI_MODEL || 'auto';
+
+const anthropic = {
+  messages: {
+    create: async ({ max_tokens, system, messages }) => {
+      const chatMessages = [];
+      if (system) chatMessages.push({ role: 'system', content: system });
+      chatMessages.push(...messages);
+      const res = await fetch(`${_NEOROUTER_BASE}/chat/completions`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${_NEOROUTER_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: _LLM_MODEL, max_tokens, messages: chatMessages }),
+      });
+      if (!res.ok) { const e = await res.text(); throw new Error(`NeoRouter ${res.status}: ${e}`); }
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content ?? '';
+      return { content: [{ type: 'text', text }] };
+    }
+  }
+};
 
 // Configure multer for file uploads
 // Use /tmp for Vercel serverless (only writable directory)

@@ -1,18 +1,15 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { HR_AGENT_SYSTEM_PROMPT } = require('../config/hr-agent-prompt');
 
-class AIService {
-  constructor(apiKey, model = 'gemini-2.0-flash') {
-    this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = model;
+const NEOROUTER_BASE = process.env.NEOROUTER_BASE_URL || 'http://neorouter.stage.in/v1';
 
-    // Store conversation history per user
+class AIService {
+  constructor(apiKey, model = 'auto') {
+    // apiKey: NEOROUTER_API_KEY (preferred) → GEMINI_API_KEY → ANTHROPIC_API_KEY
+    this.apiKey = process.env.NEOROUTER_API_KEY || apiKey;
+    this.model = model;
     this.conversations = new Map();
   }
 
-  /**
-   * Get or initialize conversation history for a user
-   */
   getConversation(userId) {
     if (!this.conversations.has(userId)) {
       this.conversations.set(userId, []);
@@ -20,54 +17,44 @@ class AIService {
     return this.conversations.get(userId);
   }
 
-  /**
-   * Clear conversation history for a user
-   */
   clearConversation(userId) {
     this.conversations.delete(userId);
   }
 
-  /**
-   * Send message to Gemini and get response
-   */
   async sendMessage(userId, userMessage) {
     try {
-      // Get conversation history
       const history = this.getConversation(userId);
 
-      // Create chat session with system instruction
-      const model = this.genAI.getGenerativeModel({
-        model: this.model,
-        systemInstruction: HR_AGENT_SYSTEM_PROMPT,
+      const messages = [
+        { role: 'system', content: HR_AGENT_SYSTEM_PROMPT },
+        ...history.map(msg => ({ role: msg.role === 'assistant' ? 'assistant' : 'user', content: msg.content })),
+        { role: 'user', content: userMessage },
+      ];
+
+      const response = await fetch(`${NEOROUTER_BASE}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: this.model,
+          max_tokens: 2048,
+          messages,
+        }),
       });
 
-      // Convert history to Gemini format
-      const geminiHistory = history.map(msg => ({
-        role: msg.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: msg.content }]
-      }));
+      if (!response.ok) {
+        const errBody = await response.text();
+        throw new Error(`NeoRouter ${response.status}: ${errBody}`);
+      }
 
-      // Start chat with history
-      const chat = model.startChat({
-        history: geminiHistory,
-      });
+      const data = await response.json();
+      const assistantMessage = data.choices?.[0]?.message?.content ?? '';
 
-      // Send message
-      const result = await chat.sendMessage(userMessage);
-      const response = await result.response;
-      const assistantMessage = response.text();
+      history.push({ role: 'user', content: userMessage });
+      history.push({ role: 'assistant', content: assistantMessage });
 
-      // Add to history
-      history.push({
-        role: 'user',
-        content: userMessage
-      });
-      history.push({
-        role: 'assistant',
-        content: assistantMessage
-      });
-
-      // Keep only last 20 messages to manage memory
       if (history.length > 20) {
         history.splice(0, history.length - 20);
       }
@@ -75,37 +62,27 @@ class AIService {
       return {
         success: true,
         message: assistantMessage,
-        usage: {
-          model: this.model,
-          provider: 'Google Gemini'
-        }
+        usage: { model: this.model, provider: 'NeoRouter' },
       };
-
     } catch (error) {
-      console.error('Gemini API Error:', error);
+      console.error('NeoRouter API Error:', error);
       return {
         success: false,
-        error: error.message || 'Failed to get response from Gemini'
+        error: error.message || 'Failed to get response from NeoRouter',
       };
     }
   }
 
-  /**
-   * Reset conversation and start fresh
-   */
   async resetConversation(userId) {
     this.clearConversation(userId);
     return this.sendMessage(userId, 'menu');
   }
 
-  /**
-   * Get conversation stats
-   */
   getStats() {
     return {
       activeConversations: this.conversations.size,
       totalMessages: Array.from(this.conversations.values())
-        .reduce((sum, conv) => sum + conv.length, 0)
+        .reduce((sum, conv) => sum + conv.length, 0),
     };
   }
 }

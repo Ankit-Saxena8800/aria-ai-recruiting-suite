@@ -4,8 +4,8 @@ const AIService = require('./utils/ai-service');
 
 // Initialize AI service (Gemini)
 const ai = new AIService(
-  process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY,
-  process.env.AI_MODEL || 'gemini-2.0-flash-exp'
+  process.env.NEOROUTER_API_KEY || process.env.GEMINI_API_KEY || process.env.ANTHROPIC_API_KEY,
+  process.env.AI_MODEL || 'auto'
 );
 
 // Initialize Slack app
