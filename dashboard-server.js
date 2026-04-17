@@ -209,6 +209,20 @@ const _NEOROUTER_BASE = process.env.NEOROUTER_BASE_URL || 'http://neorouter.stag
 const _NEOROUTER_KEY = process.env.NEOROUTER_API_KEY || process.env.ANTHROPIC_API_KEY;
 const _LLM_MODEL = process.env.AI_MODEL || 'auto';
 
+// NeoRouter always returns SSE regardless of stream:false — parse it
+function _parseSse(rawBody) {
+  let text = '';
+  for (const rawLine of rawBody.split('\n')) {
+    const line = rawLine.trimEnd();
+    if (!line.startsWith('data: ') || line === 'data: [DONE]') continue;
+    try {
+      const chunk = JSON.parse(line.slice(6));
+      text += chunk.choices?.[0]?.delta?.content ?? chunk.choices?.[0]?.message?.content ?? '';
+    } catch { /* skip malformed chunk */ }
+  }
+  return text;
+}
+
 const anthropic = {
   messages: {
     create: async ({ max_tokens, system, messages }) => {
@@ -218,11 +232,11 @@ const anthropic = {
       const res = await fetch(`${_NEOROUTER_BASE}/chat/completions`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${_NEOROUTER_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: _LLM_MODEL, max_tokens, messages: chatMessages }),
+        body: JSON.stringify({ model: _LLM_MODEL, max_tokens, messages: chatMessages, stream: true }),
       });
       if (!res.ok) { const e = await res.text(); throw new Error(`NeoRouter ${res.status}: ${e}`); }
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content ?? '';
+      const rawBody = await res.text();
+      const text = rawBody.includes('data: ') ? _parseSse(rawBody) : (JSON.parse(rawBody).choices?.[0]?.message?.content ?? '');
       return { content: [{ type: 'text', text }] };
     }
   }

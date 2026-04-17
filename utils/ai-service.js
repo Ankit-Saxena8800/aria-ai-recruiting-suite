@@ -41,6 +41,7 @@ class AIService {
           model: this.model,
           max_tokens: 2048,
           messages,
+          stream: true,
         }),
       });
 
@@ -49,8 +50,14 @@ class AIService {
         throw new Error(`NeoRouter ${response.status}: ${errBody}`);
       }
 
-      const data = await response.json();
-      const assistantMessage = data.choices?.[0]?.message?.content ?? '';
+      const rawBody = await response.text();
+      const assistantMessage = rawBody.includes('data: ')
+        ? rawBody.split('\n').reduce((acc, line) => {
+            const l = line.trimEnd();
+            if (!l.startsWith('data: ') || l === 'data: [DONE]') return acc;
+            try { const c = JSON.parse(l.slice(6)); return acc + (c.choices?.[0]?.delta?.content ?? c.choices?.[0]?.message?.content ?? ''); } catch { return acc; }
+          }, '')
+        : (JSON.parse(rawBody).choices?.[0]?.message?.content ?? '');
 
       history.push({ role: 'user', content: userMessage });
       history.push({ role: 'assistant', content: assistantMessage });
